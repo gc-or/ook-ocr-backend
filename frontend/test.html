@@ -948,7 +948,10 @@
             try {
                 const res = await fetch(`${API_BASE}/api/books/${bookId}`, {
                     method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-User-ID': userUUID  // 关键：添加用户验证头
+                    },
                     body: JSON.stringify(data)
                 });
 
@@ -960,14 +963,13 @@
                         loadUserBooks(data.status);
                     } else if (document.getElementById('libraryPage').classList.contains('active')) {
                         searchBooks();
-                    } else {
-                        // 如果是在扫描页的结果列表编辑，暂不自动刷新整个列表，或者可以清空结果
                     }
                 } else {
                     const err = await res.json();
                     alert('保存失败: ' + err.detail);
                 }
             } catch (e) {
+                console.error(e);
                 alert('网络错误');
             }
         }
@@ -977,8 +979,11 @@
             const bookId = document.getElementById('editBookId').value;
 
             try {
-                const res = await fetch(`${API_BASE}/api/books/${bookId}?owner_id=${userUUID}`, {
-                    method: 'DELETE'
+                const res = await fetch(`${API_BASE}/api/books/${bookId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-User-ID': userUUID  // 关键：添加用户验证头
+                    }
                 });
 
                 if (res.ok) {
@@ -986,9 +991,11 @@
                     closeEditModal();
                     loadUserBooks(0); // 假设主要是在管理页面删除
                 } else {
-                    alert('删除失败，可能无权限');
+                    const err = await res.json();
+                    alert('删除失败: ' + err.detail);
                 }
             } catch (e) {
+                console.error(e);
                 alert('网络错误');
             }
         }
