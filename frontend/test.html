@@ -928,11 +928,6 @@
             if (qq) document.getElementById('quickQQ').value = qq;
             document.getElementById('quickDeliveryMethod').value = deliveryMethod;
             document.getElementById('quickPickupLocation').value = pickupLocation;
-            
-            // 修复 Bug：初始化 userUUID，否则无法删除自己的书
-            if (studentId) {
-                userUUID = studentId;
-            }
             document.getElementById('quickDeliveryFee').value = deliveryFee;
 
             // 不再自动隐藏，允许用户随时修改信息
@@ -1271,12 +1266,11 @@
             let deliveryHtml = '';
             if (book.delivery_method) {
                 let deliveryInfo = book.delivery_method;
-                // 修复 Bug：确保自提地点能显示出来
                 if (book.delivery_method.includes('自提') && book.pickup_location) {
-                    deliveryInfo += ` <span style="color:#666;font-size:0.9em">📍${book.pickup_location}</span>`;
+                    deliveryInfo += ` (${book.pickup_location})`;
                 }
                 if (book.delivery_method.includes('可送') && book.delivery_fee) {
-                    deliveryInfo += ` <span style="color:#666;font-size:0.9em">💰${book.delivery_fee}</span>`;
+                    deliveryInfo += ` (${book.delivery_fee})`;
                 }
                 deliveryHtml = `<div class="meta-item">🚚 ${deliveryInfo}</div>`;
             }
@@ -1307,8 +1301,7 @@
 
                 if (isMine) {
                     if (book.id) actionBtn = `<button class="btn btn-secondary btn-small" onclick="openEditModal(${book.id})">✏️ 编辑</button>`;
-                } else if (book.contact) { 
-                    // 只要有联系方式就显示联系按钮，不管是不是已售（已售的在上面有透明度处理）
+                } else if (book.contact && !isSold) {
                     actionBtn = `<button class="btn btn-small" style="background:#e0f2f1;color:#00897b" onclick="copyContact('${book.contact}')">💬 联系卖家</button>`;
                 }
             }
