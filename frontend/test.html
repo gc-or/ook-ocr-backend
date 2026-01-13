@@ -570,6 +570,19 @@
 
             <div class="card">
                 <div class="form-group">
+                    <label style="font-weight: bold;">🎓 我的学号</label>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" id="studentIdInput" placeholder="请输入学号作为您的身份标识">
+                        <button class="btn btn-primary" onclick="saveStudentId()"
+                            style="width: auto; margin: 0;">设置</button>
+                    </div>
+                    <p style="font-size: 12px; color: #666; margin-top: 5px;">
+                        * 学号将作为您的唯一身份标识，用于管理您的书籍<br>
+                        * 换设备时输入同一学号即可恢复身份
+                    </p>
+                </div>
+
+                <div class="form-group">
                     <label style="font-weight: bold;">我的联系方式 (QQ)</label>
                     <div style="display: flex; gap: 10px;">
                         <input type="number" id="userQQInput" placeholder="请输入QQ号，方便买家联系">
@@ -830,13 +843,24 @@
         let selectedFile = null;
         let currentCategory = '全部';
 
-        // 用户身份逻辑
+        // 用户身份逻辑（使用学号）
         let userUUID = localStorage.getItem('user_uuid');
-        if (!userUUID) {
-            userUUID = 'user_' + Date.now() + Math.random().toString(36).substr(2, 9);
+        let studentId = localStorage.getItem('student_id');
+
+        // 如果没有学号，提示用户设置
+        if (!studentId) {
+            console.log('⚠️ 未设置学号，请在个人中心设置');
+            // 暂时使用临时ID，但会提示用户设置学号
+            if (!userUUID) {
+                userUUID = 'temp_' + Date.now();
+                localStorage.setItem('user_uuid', userUUID);
+            }
+        } else {
+            // 使用学号作为 user_uuid
+            userUUID = studentId;
             localStorage.setItem('user_uuid', userUUID);
-            console.log('✨ 新身份 ID:', userUUID);
         }
+
 
         // 初始化加载
         window.onload = function () {
@@ -876,12 +900,55 @@
                 document.getElementById('userPage').classList.add('active');
 
                 // Init user page info
-                document.getElementById('userUuidDisplay').textContent = 'ID: ' + userUUID;
+                const currentStudentId = localStorage.getItem('student_id');
+                if (currentStudentId) {
+                    document.getElementById('userUuidDisplay').textContent = '学号: ' + currentStudentId;
+                    document.getElementById('studentIdInput').value = currentStudentId;
+                } else {
+                    document.getElementById('userUuidDisplay').textContent = '⚠️ 请设置学号';
+                    document.getElementById('userUuidDisplay').style.color = '#ff9800';
+                }
+
                 const savedQQ = localStorage.getItem('user_qq');
                 if (savedQQ) document.getElementById('userQQInput').value = savedQQ;
 
                 loadUserBooks(0); // Default load selling books
             }
+        }
+
+        // 保存学号
+        function saveStudentId() {
+            const studentId = document.getElementById('studentIdInput').value.trim();
+            if (!studentId) {
+                alert('请输入学号');
+                return;
+            }
+
+            // 简单验证：只允许字母和数字
+            if (!/^[a-zA-Z0-9]+$/.test(studentId)) {
+                alert('学号格式不正确，只能包含字母和数字');
+                return;
+            }
+
+            // 确认是否更改
+            const currentId = localStorage.getItem('student_id');
+            if (currentId && currentId !== studentId) {
+                if (!confirm(`当前学号为 ${currentId}，确定要更改为 ${studentId} 吗？更改后将无法管理之前的书籍。`)) {
+                    return;
+                }
+            }
+
+            localStorage.setItem('student_id', studentId);
+            localStorage.setItem('user_uuid', studentId);
+            userUUID = studentId;
+            studentId = studentId;
+
+            document.getElementById('userUuidDisplay').textContent = '学号: ' + studentId;
+            document.getElementById('userUuidDisplay').style.color = '';
+            alert('学号设置成功！');
+
+            // 刷新书籍列表
+            loadUserBooks(0);
         }
 
         // 保存个人信息
