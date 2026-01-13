@@ -1,0 +1,10 @@
+# 配置 Railway (Nixpacks) 的构建环境
+
+[phases.setup]
+nixPkgs = ["python311", "libGL", "libglvnd", "glib"]
+
+[phases.install]
+cmds = ["python -m venv /opt/venv && . /opt/venv/bin/activate && pip install -r requirements.txt"]
+
+[start]
+cmd = ". /opt/venv/bin/activate && cd backend && python -m uvicorn app.main:app --host 0.0.0.0 --port $PORT"
