@@ -114,6 +114,9 @@ async def analyze_image(
     Header X-User-ID: 当前用户 ID
     Header X-Contact: 当前用户联系方式
     """
+    import time
+    start_total = time.time()
+    
     matching_files = list(UPLOAD_DIR.glob(f"{file_id}.*"))
     if not matching_files:
         raise HTTPException(status_code=404, detail=f"文件不存在: {file_id}")
@@ -122,15 +125,21 @@ async def analyze_image(
     
     try:
         # OCR
+        t0 = time.time()
         ocr_service = get_ocr_service()
         ocr_text = ocr_service.extract_text(str(file_path))
+        t1 = time.time()
+        print(f"⏱️ [Perf] OCR Engine took: {t1 - t0:.2f}s")
         
         if not ocr_text.strip():
             return AnalyzeResponse(success=False, message="未能从图片中识别出文字", ocr_text="")
         
         # LLM
+        t2 = time.time()
         llm_service = get_llm_service()
         books_data = await llm_service.extract_book_info(ocr_text)
+        t3 = time.time()
+        print(f"⏱️ [Perf] LLM Service took: {t3 - t2:.2f}s")
         
         # 补充用户信息
         if books_data and x_user_id:
@@ -151,6 +160,9 @@ async def analyze_image(
             if i < len(saved_ids):
                 book_obj.id = saved_ids[i]
             books.append(book_obj)
+        
+        end_total = time.time()
+        print(f"⏱️ [Perf] Total Request took: {end_total - start_total:.2f}s")
         
         return AnalyzeResponse(
             success=True,

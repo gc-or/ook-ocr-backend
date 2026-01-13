@@ -3,13 +3,14 @@
 使用 SQLite 存储书籍信息，支持搜索、编辑、价格等功能
 """
 import sqlite3
+import os
 from pathlib import Path
 from typing import Optional
 from contextlib import contextmanager
 
 
-# 数据库文件路径
-DB_PATH = Path(__file__).parent.parent.parent / "books.db"
+# 数据库文件路径 (优先使用环境变量，支持 Railway 持久化)
+DB_PATH = os.getenv("DB_PATH") or (Path(__file__).parent.parent.parent / "books.db")
 
 
 class DatabaseService:

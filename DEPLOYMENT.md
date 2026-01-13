@@ -12,7 +12,7 @@
 6.  回到你电脑的**终端**（PowerShell），执行以下命令（把地址换成你刚才复制的）：
 
 ```bash
-git remote add origin https://github.com/yourname/book-ocr-backend.git
+git remote add origin https://github.com/gc-or/ook-ocr-backend.git
 git branch -M main
 git push -u origin main
 ```
@@ -34,7 +34,21 @@ git push -u origin main
     *   **VALUE**: `sk-tmdzipjmgxvqbavkeroezszxqqnmrmihnykerplgemtybfpv` (这是你的 Key)
 5.  添加后，Railway 会自动重新部署。
 
-## 第四步：获取后端网址
+## 第四步：配置数据库持久化 (重要！防止数据丢失) 💾
+
+默认情况下，每次更新部署，Railway 会重置文件系统，导致数据库丢失。你需要挂载一个硬盘来保存 `books.db`。
+
+1.  在 Railway 项目页面，点击你的服务。
+2.  进入 **Volumes** 选项卡。
+3.  点击 **Add Volume**。
+4.  挂载路径 (Mount Path) 填写：`/app/data`
+5.  进入 **Settings** -> **Variables**，添加一个新变量：
+    *   **KEY**: `DB_PATH`
+    *   **VALUE**: `/app/data/books.db`
+
+设置完成后，Railway 会自动重新部署，以后你的数据就安全了！
+
+## 第五步：获取后端网址
 
 1.  等待部署成功（变成绿色）。
 2.  在 **Settings** -> **Networking** 里，点击 **Generate Domain**。
