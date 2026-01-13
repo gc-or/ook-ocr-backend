@@ -23,10 +23,16 @@ class OCRService:
             # lang="ch": 使用中文模型（也支持英文）
             # show_log=False: 关闭调试日志
             print("🔄 正在加载 PaddleOCR 模型（首次加载需要下载，请稍候...）")
+            # 优化：强制使用 CPU，禁用 GPU 和 mkldnn 以节省内存
+            # 使用轻量级模型结构
             cls._ocr = PaddleOCR(
                 use_angle_cls=True,
                 lang="ch",
-                show_log=False
+                show_log=False,
+                use_gpu=False,
+                enable_mkldnn=False, # 禁用 mkldnn 以降低内存占用
+                use_mp=False,        # 禁用多进程
+                total_process_num=1  # 限制进程数
             )
             print("✅ PaddleOCR 模型加载完成！")
         return cls._instance
