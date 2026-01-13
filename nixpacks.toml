@@ -1,10 +1,16 @@
 # 配置 Railway (Nixpacks) 的构建环境
 
 [phases.setup]
-nixPkgs = ["python311", "libGL", "libglvnd", "glib"]
+# 添加更多系统依赖，涵盖 OpenCV 可能需要的所有图形库（以防万一）
+nixPkgs = ["python311", "libGL", "libglvnd", "glib", "xorg.libXext", "xorg.libSM", "xorg.libXrender"]
 
 [phases.install]
-cmds = ["python -m venv /opt/venv && . /opt/venv/bin/activate && pip install -r requirements.txt"]
+# 1. 安装依赖
+# 2. 强制卸载可能被自动安装的有头版 opencv-python
+# 3. 确保安装无头版 opencv-python-headless (不依赖 libGL)
+cmds = [
+    "python -m venv /opt/venv && . /opt/venv/bin/activate && pip install -r requirements.txt && pip uninstall -y opencv-python && pip install opencv-python-headless"
+]
 
 [start]
 cmd = ". /opt/venv/bin/activate && cd backend && python -m uvicorn app.main:app --host 0.0.0.0 --port $PORT"
