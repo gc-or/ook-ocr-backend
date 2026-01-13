@@ -6,16 +6,17 @@
 				<text class="subtitle">拍摄书脊，自动识别信息</text>
 			</view>
 			
-			<!-- 学号输入框 (必填，放在最上方) -->
-			<view class="contact-box required-box">
-				<text class="contact-label">你的学号 <text class="required-star">*</text></text>
-				<input class="contact-input" type="text" v-model="studentId" placeholder="请先填写学号" @blur="saveStudentId" />
-			</view>
-			
-			<!-- QQ 输入框 -->
-			<view class="contact-box">
-				<text class="contact-label">你的 QQ 号 (选填):</text>
-				<input class="contact-input" type="number" v-model="qq" placeholder="方便买家联系你" @blur="saveQQ" />
+			<!-- 卖家信息 (学号+QQ，灰色样式) -->
+			<view class="seller-info-section">
+				<view class="seller-info-box">
+					<text class="seller-label">你的学号 <text class="required-star">*</text></text>
+					<input class="seller-input" type="text" v-model="studentId" placeholder="请先填写学号" @blur="saveStudentId" />
+				</view>
+				
+				<view class="seller-info-box">
+					<text class="seller-label">你的 QQ 号 (选填):</text>
+					<input class="seller-input" type="number" v-model="qq" placeholder="方便买家联系你" @blur="saveQQ" />
+				</view>
 			</view>
 			
 			<view class="preview-area" @click="chooseImage">
@@ -179,19 +180,23 @@
 	.subtitle { font-size: 14px; color: #666; margin-top: 5px; display: block; }
 	.result-section .subtitle { color: rgba(255,255,255,0.8); }
 	
-	.contact-box { background: #f0f4ff; padding: 10px; border-radius: 8px; margin-bottom: 15px; display: flex; align-items: center; }
-	.contact-box.required-box { background: #fff0f0; border: 1px solid #ffcccc; }
-	.contact-label { font-size: 14px; color: #666; margin-right: 10px; white-space: nowrap; }
+	/* 卖家信息部分 - 灰色样式 */
+	.seller-info-section { background: #f5f5f5; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+	.seller-info-box { margin-bottom: 12px; }
+	.seller-info-box:last-child { margin-bottom: 0; }
+	.seller-label { font-size: 13px; color: #999; display: block; margin-bottom: 6px; }
 	.required-star { color: #e74c3c; font-weight: bold; }
-	.contact-input { flex: 1; font-size: 14px; height: 30px; }
+	.seller-input { border: 1px solid #ddd; height: 36px; padding: 0 12px; border-radius: 6px; font-size: 14px; color: #666; background: #fff; }
 	
-	.preview-area { background: #f5f5f5; border-radius: 12px; height: 250px; display: flex; align-items: center; justify-content: center; position: relative; }
+	.preview-area { background: #f5f5f5; border-radius: 12px; height: 250px; display: flex; align-items: center; justify-content: center; position: relative; margin-bottom: 15px; }
 	.preview-image { width: 100%; height: 100%; }
 	.placeholder { text-align: center; color: #999; }
 	.icon { font-size: 40px; display: block; margin-bottom: 10px; }
 	.clear-btn { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.5); color: #fff; width: 24px; height: 24px; border-radius: 50%; text-align: center; line-height: 24px; }
 	
-	.btn { margin-top: 15px; border-radius: 25px; background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; }
+	.status-text { text-align: center; font-size: 14px; color: #666; margin-bottom: 15px; min-height: 20px; }
+	
+	.btn { margin-top: 0; border-radius: 25px; background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; }
 	
 	.book-card { background: #fff; border-radius: 12px; padding: 15px; margin-bottom: 10px; position: relative; }
 	.category-badge { position: absolute; top: 0; right: 0; padding: 2px 10px; font-size: 11px; color: #fff; border-radius: 0 12px 0 12px; }
