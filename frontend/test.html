@@ -524,6 +524,47 @@
                     手动添加书籍</button>
             </div>
 
+            <!-- 用户信息快速设置 -->
+            <div class="card" id="userInfoQuickSetup" style="margin-top: 20px;">
+                <div class="header">
+                    <div class="title" style="font-size: 18px;">👤 卖家信息</div>
+                    <div class="subtitle">首次使用请先设置，方便买家联系您</div>
+                </div>
+
+                <div class="form-group">
+                    <label>🎓 学号（必填）</label>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" id="quickStudentId" placeholder="输入学号作为身份标识">
+                        <button class="btn btn-primary" onclick="saveQuickInfo()"
+                            style="width: auto; margin: 0;">保存</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>📞 QQ号（必填）</label>
+                    <input type="number" id="quickQQ" placeholder="输入QQ号，方便买家联系">
+                </div>
+
+                <div class="form-group">
+                    <label>🚚 默认交易方式</label>
+                    <select id="quickDeliveryMethod" onchange="toggleQuickDeliveryFields()">
+                        <option value="自提">📍 仅自提</option>
+                        <option value="可送">🚚 仅可送</option>
+                        <option value="自提或可送">📍🚚 自提或可送</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="quickPickupGroup">
+                    <label>📍 自提地点</label>
+                    <input type="text" id="quickPickupLocation" placeholder="如：图书馆门口、宿舍楼下">
+                </div>
+
+                <div class="form-group" id="quickDeliveryGroup" style="display: none;">
+                    <label>💰 配送费用</label>
+                    <input type="text" id="quickDeliveryFee" placeholder="如：免费、5元、面议">
+                </div>
+            </div>
+
             <div id="resultSection" style="display: none;">
                 <div class="card">
                     <div class="header">
@@ -864,16 +905,93 @@
 
         // 初始化加载
         window.onload = function () {
+            // 初始化快速设置区域
+            initQuickSetup();
+
             const savedQQ = localStorage.getItem('user_qq');
             if (savedQQ) {
                 const input = document.getElementById('userQQInput');
                 if (input) input.value = savedQQ;
             }
-            // 预加载书库统计
-            if (document.getElementById('libraryPage')) {
-                // Optional: Preload stats if wanted
+        }
+
+        // 初始化快速设置
+        function initQuickSetup() {
+            const studentId = localStorage.getItem('student_id');
+            const qq = localStorage.getItem('user_qq');
+            const deliveryMethod = localStorage.getItem('default_delivery_method') || '自提';
+            const pickupLocation = localStorage.getItem('default_pickup_location') || '';
+            const deliveryFee = localStorage.getItem('default_delivery_fee') || '';
+
+            // 填充已保存的信息
+            if (studentId) document.getElementById('quickStudentId').value = studentId;
+            if (qq) document.getElementById('quickQQ').value = qq;
+            document.getElementById('quickDeliveryMethod').value = deliveryMethod;
+            document.getElementById('quickPickupLocation').value = pickupLocation;
+            document.getElementById('quickDeliveryFee').value = deliveryFee;
+
+            // 如果已经设置了学号和QQ，隐藏快速设置卡片
+            if (studentId && qq) {
+                document.getElementById('userInfoQuickSetup').style.display = 'none';
+            }
+
+            // 更新字段显示
+            toggleQuickDeliveryFields();
+        }
+
+        // 切换快速设置的交易方式字段
+        function toggleQuickDeliveryFields() {
+            const method = document.getElementById('quickDeliveryMethod').value;
+            const pickupGroup = document.getElementById('quickPickupGroup');
+            const deliveryGroup = document.getElementById('quickDeliveryGroup');
+
+            if (method === '自提') {
+                pickupGroup.style.display = 'block';
+                deliveryGroup.style.display = 'none';
+            } else if (method === '可送') {
+                pickupGroup.style.display = 'none';
+                deliveryGroup.style.display = 'block';
+            } else {
+                pickupGroup.style.display = 'block';
+                deliveryGroup.style.display = 'block';
             }
         }
+
+        // 保存快速设置信息
+        function saveQuickInfo() {
+            const studentId = document.getElementById('quickStudentId').value.trim();
+            const qq = document.getElementById('quickQQ').value.trim();
+
+            if (!studentId) {
+                alert('请输入学号');
+                return;
+            }
+
+            if (!/^[a-zA-Z0-9]+$/.test(studentId)) {
+                alert('学号格式不正确，只能包含字母和数字');
+                return;
+            }
+
+            if (!qq) {
+                alert('请输入QQ号');
+                return;
+            }
+
+            // 保存所有信息
+            localStorage.setItem('student_id', studentId);
+            localStorage.setItem('user_uuid', studentId);
+            localStorage.setItem('user_qq', qq);
+            localStorage.setItem('default_delivery_method', document.getElementById('quickDeliveryMethod').value);
+            localStorage.setItem('default_pickup_location', document.getElementById('quickPickupLocation').value.trim());
+            localStorage.setItem('default_delivery_fee', document.getElementById('quickDeliveryFee').value.trim());
+
+            userUUID = studentId;
+            alert('信息保存成功！');
+
+            // 隐藏快速设置卡片
+            document.getElementById('userInfoQuickSetup').style.display = 'none';
+        }
+
 
         const categoryColors = {
             '高等数学': '#FF6B6B', '线性代数': '#4ECDC4', '概率统计': '#45B7D1',
