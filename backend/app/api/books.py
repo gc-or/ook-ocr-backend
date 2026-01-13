@@ -176,13 +176,19 @@ async def analyze_image(
     file_id: str, 
     save: bool = True,
     x_user_id: Optional[str] = Header(None, alias="X-User-ID"),
-    x_contact: Optional[str] = Header(None, alias="X-Contact")
+    x_contact: Optional[str] = Header(None, alias="X-Contact"),
+    x_delivery_method: Optional[str] = Header(None, alias="X-Delivery-Method"),
+    x_pickup_location: Optional[str] = Header(None, alias="X-Pickup-Location"),
+    x_delivery_fee: Optional[str] = Header(None, alias="X-Delivery-Fee")
 ):
     """
     分析书脊图片，提取书籍信息
     
     Header X-User-ID: 当前用户 ID
     Header X-Contact: 当前用户联系方式
+    Header X-Delivery-Method: 交易方式
+    Header X-Pickup-Location: 自提地点
+    Header X-Delivery-Fee: 配送费用
     """
     import time
     start_total = time.time()
@@ -221,12 +227,18 @@ async def analyze_image(
             db_service = get_db_service()
             books_data = enhance_with_db_matching(books_data, db_service)
         
-        # 补充用户信息
+        # 补充用户信息和交易方式
         if books_data and x_user_id:
             for book in books_data:
                 book["owner_id"] = x_user_id
                 if x_contact:
                     book["contact"] = x_contact
+                if x_delivery_method:
+                    book["delivery_method"] = x_delivery_method
+                if x_pickup_location:
+                    book["pickup_location"] = x_pickup_location
+                if x_delivery_fee:
+                    book["delivery_fee"] = x_delivery_fee
         
         # 保存到数据库
         saved_ids = []

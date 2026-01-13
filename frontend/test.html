@@ -930,10 +930,10 @@
             document.getElementById('quickPickupLocation').value = pickupLocation;
             document.getElementById('quickDeliveryFee').value = deliveryFee;
 
-            // 如果已经设置了学号和QQ，隐藏快速设置卡片
-            if (studentId && qq) {
-                document.getElementById('userInfoQuickSetup').style.display = 'none';
-            }
+            // 不再自动隐藏，允许用户随时修改信息
+            // if (studentId && qq) {
+            //     document.getElementById('userInfoQuickSetup').style.display = 'none';
+            // }
 
             // 更新字段显示
             toggleQuickDeliveryFields();
@@ -986,10 +986,10 @@
             localStorage.setItem('default_delivery_fee', document.getElementById('quickDeliveryFee').value.trim());
 
             userUUID = studentId;
-            alert('信息保存成功！');
+            alert('信息保存成功！可随时修改交易方式信息。');
 
-            // 隐藏快速设置卡片
-            document.getElementById('userInfoQuickSetup').style.display = 'none';
+            // 不再隐藏卡片，允许用户随时修改
+            // document.getElementById('userInfoQuickSetup').style.display = 'none';
         }
 
 
@@ -1199,6 +1199,14 @@
                 const qq = localStorage.getItem('user_qq');
                 if (qq) headers['X-Contact'] = qq;
 
+                // 添加交易方式信息
+                const deliveryMethod = localStorage.getItem('default_delivery_method');
+                const pickupLocation = localStorage.getItem('default_pickup_location');
+                const deliveryFee = localStorage.getItem('default_delivery_fee');
+                if (deliveryMethod) headers['X-Delivery-Method'] = deliveryMethod;
+                if (pickupLocation) headers['X-Pickup-Location'] = pickupLocation;
+                if (deliveryFee) headers['X-Delivery-Fee'] = deliveryFee;
+
                 const response = await fetch(`${API_BASE}/api/analyze-direct?save=true`, {
                     method: 'POST',
                     body: formData,
@@ -1287,7 +1295,9 @@
             let actionBtn = '';
             if (showActions) {
                 // 判断逻辑：自己发的 -> 编辑；别人发的且有联系方式 -> 联系
-                const isMine = (book.owner_id === userUUID) || (!book.owner_id && !book.id);
+                // 确保使用当前的 userUUID 或 studentId
+                const currentUserId = localStorage.getItem('student_id') || localStorage.getItem('user_uuid');
+                const isMine = (book.owner_id === currentUserId) || (!book.owner_id && !book.id);
 
                 if (isMine) {
                     if (book.id) actionBtn = `<button class="btn btn-secondary btn-small" onclick="openEditModal(${book.id})">✏️ 编辑</button>`;
