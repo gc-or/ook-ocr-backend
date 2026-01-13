@@ -20,3 +20,6 @@ Pillow==10.2.0
 
 # NumPy 版本兼容性 (PaddlePaddle 需要 NumPy 1.x)
 numpy>=1.21.0,<2.0.0
+
+# 系统工具 (Paddle 依赖)
+setuptools
