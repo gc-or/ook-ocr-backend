@@ -19,6 +19,71 @@ UPLOAD_DIR = Path(__file__).parent.parent.parent / "uploads"
 UPLOAD_DIR.mkdir(exist_ok=True)
 
 
+# ============ 辅助函数 ============
+
+def fuzzy_match_title(title1: str, title2: str) -> float:
+    """
+    计算两个书名的相似度（0.0-1.0）
+    使用 difflib.SequenceMatcher 进行模糊匹配
+    """
+    from difflib import SequenceMatcher
+    return SequenceMatcher(None, title1, title2).ratio()
+
+
+def enhance_with_db_matching(books_data: list[dict], db_service) -> list[dict]:
+    """
+    使用数据库中已有记录来增强识别结果
+    
+    Args:
+        books_data: LLM 识别的书籍列表
+        db_service: 数据库服务实例
+        
+    Returns:
+        增强后的书籍列表（修正书名、提升置信度）
+    """
+    # 获取数据库中所有书籍（用于匹配）
+    all_books = db_service.search_books(limit=1000)  # 获取足够多的记录用于匹配
+    
+    enhanced_books = []
+    for book in books_data:
+        original_title = book.get("title", "")
+        best_match = None
+        best_similarity = 0.0
+        
+        # 与数据库中的每本书比对
+        for db_book in all_books:
+            db_title = db_book.get("title", "")
+            similarity = fuzzy_match_title(original_title, db_title)
+            
+            if similarity > best_similarity:
+                best_similarity = similarity
+                best_match = db_book
+        
+        # 如果找到高相似度匹配（>0.8），使用数据库中的正确信息
+        if best_similarity >= 0.8 and best_match:
+            print(f"📚 匹配成功: '{original_title}' -> '{best_match['title']}' (相似度: {best_similarity:.2%})")
+            
+            # 使用数据库中的准确信息替换
+            book["title"] = best_match["title"]
+            if best_match.get("author"):
+                book["author"] = best_match["author"]
+            if best_match.get("publisher"):
+                book["publisher"] = best_match["publisher"]
+            if best_match.get("edition"):
+                book["edition"] = best_match["edition"]
+            if best_match.get("category"):
+                book["category"] = best_match["category"]
+            
+            # 提升置信度（表示这是经过验证的正确结果）
+            original_conf = book.get("confidence", 0.5)
+            book["confidence"] = max(0.95, original_conf)  # 至少 0.95
+            book["_matched_from_db"] = True  # 标记来源
+        
+        enhanced_books.append(book)
+    
+    return enhanced_books
+
+
 # ============ 数据模型 ============
 
 class BookInfo(BaseModel):
@@ -150,6 +215,11 @@ async def analyze_image(
         books_data = await llm_service.extract_book_info(ocr_text)
         t3 = time.time()
         print(f"⏱️ [Perf] LLM Service took: {t3 - t2:.2f}s")
+        
+        # 🧠 智能学习：从数据库匹配相似书籍，提升准确率
+        if books_data:
+            db_service = get_db_service()
+            books_data = enhance_with_db_matching(books_data, db_service)
         
         # 补充用户信息
         if books_data and x_user_id:

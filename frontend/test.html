@@ -979,11 +979,44 @@
                 }
             }
 
+            // 置信度标签 (仅在刚识别时显示，已保存的不显示)
+            let confidenceBadge = '';
+            if (book.confidence !== undefined && book.confidence !== null && !book.id) {
+                const conf = book.confidence;
+                let badgeColor, badgeText, badgeIcon;
+
+                // 检查是否来自数据库匹配
+                const isDbMatched = book._matched_from_db === true;
+
+                if (conf >= 0.8) {
+                    badgeColor = '#4caf50';  // 绿色
+                    badgeText = isDbMatched ? 'AI学习' : '准确';
+                    badgeIcon = isDbMatched ? '📚' : '✓';
+                } else if (conf >= 0.5) {
+                    badgeColor = '#ff9800';  // 橙色
+                    badgeText = '待核对';
+                    badgeIcon = '⚠';
+                } else {
+                    badgeColor = '#f44336';  // 红色
+                    badgeText = '需检查';
+                    badgeIcon = '!';
+                }
+
+                confidenceBadge = `
+                    <div style="display: inline-block; background: ${badgeColor}; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px; margin-left: 8px; font-weight: 500;">
+                        ${badgeIcon} ${badgeText} ${(conf * 100).toFixed(0)}%
+                    </div>
+                `;
+            }
+
             return `
             <div class="book-card" style="${opacityStyle}position: relative;">
                 ${checkboxHtml}
                 <div class="category-badge" style="background:${isSold ? '#999' : color}">${book.category || '其他'}</div>
-                <div class="book-title">${book.title}</div>
+                <div class="book-title">
+                    ${book.title}
+                    ${confidenceBadge}
+                </div>
                 <div class="book-meta">
                     ${book.author ? `<div class="meta-item">👤 ${book.author}</div>` : ''}
                     ${book.publisher ? `<div class="meta-item">🏢 ${book.publisher}</div>` : ''}
