@@ -42,7 +42,11 @@ async def root():
     """根路由 - 返回前端页面"""
     index_file = FRONTEND_DIR / "test.html"
     if index_file.exists():
-        return FileResponse(index_file)
+        response = FileResponse(index_file)
+        response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+        return response
     return {
         "message": "📚 校园二手书 AI 识别服务已启动!",
         "status": "running",
