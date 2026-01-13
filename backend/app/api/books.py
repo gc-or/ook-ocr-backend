@@ -100,6 +100,9 @@ class BookInfo(BaseModel):
     contact: Optional[str] = None   # QQ/微信
     owner_id: Optional[str] = None  # 用户 ID
     status: Optional[int] = 0       # 0:在售, 1:已售
+    delivery_method: Optional[str] = None  # 拿书方式：自提/可送/自提或可送
+    pickup_location: Optional[str] = None  # 自提地点
+    delivery_fee: Optional[str] = None  # 配送费用
 
 
 class BookUpdate(BaseModel):
@@ -114,6 +117,9 @@ class BookUpdate(BaseModel):
     description: Optional[str] = None
     contact: Optional[str] = None
     status: Optional[int] = None
+    delivery_method: Optional[str] = None  # 拿书方式
+    pickup_location: Optional[str] = None  # 自提地点
+    delivery_fee: Optional[str] = None  # 配送费用
 
 
 class AnalyzeResponse(BaseModel):

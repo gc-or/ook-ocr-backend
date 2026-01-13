@@ -87,8 +87,8 @@ class DatabaseService:
         with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""
-                INSERT INTO books (title, author, publisher, edition, category, price, condition, description, owner_id, contact, status, image_path, ocr_text)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO books (title, author, publisher, edition, category, price, condition, description, owner_id, contact, status, image_path, ocr_text, delivery_method, pickup_location, delivery_fee)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 book_info.get("title", "未知书名"),
                 book_info.get("author"),
@@ -102,7 +102,10 @@ class DatabaseService:
                 book_info.get("contact"),
                 book_info.get("status", 0),
                 image_path,
-                ocr_text
+                ocr_text,
+                book_info.get("delivery_method"),
+                book_info.get("pickup_location"),
+                book_info.get("delivery_fee")
             ))
             conn.commit()
             book_id = cursor.lastrowid
@@ -128,7 +131,7 @@ class DatabaseService:
             params = []
             
             # 允许更新的字段
-            allowed_fields = ['title', 'author', 'publisher', 'edition', 'category', 'price', 'condition', 'description', 'contact', 'status']
+            allowed_fields = ['title', 'author', 'publisher', 'edition', 'category', 'price', 'condition', 'description', 'contact', 'status', 'delivery_method', 'pickup_location', 'delivery_fee']
             
             for field in allowed_fields:
                 if field in book_info:
