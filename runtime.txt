@@ -1,0 +1,2 @@
+# Railway 使用 nixpacks 检测 Python 版本
+python-3.10
