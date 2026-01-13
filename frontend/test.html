@@ -1014,7 +1014,7 @@
                 document.getElementById('userPage').classList.add('active');
 
                 // Init user page info
-                const currentStudentId = localStorage.getItem('student_id');
+                const currentStudentId = localStorage.getItem('user_student_id');
                 if (currentStudentId) {
                     document.getElementById('userUuidDisplay').textContent = '学号: ' + currentStudentId;
                     document.getElementById('studentIdInput').value = currentStudentId;
@@ -1045,14 +1045,14 @@
             }
 
             // 确认是否更改
-            const currentId = localStorage.getItem('student_id');
+            const currentId = localStorage.getItem('user_student_id');
             if (currentId && currentId !== studentId) {
                 if (!confirm(`当前学号为 ${currentId}，确定要更改为 ${studentId} 吗？更改后将无法管理之前的书籍。`)) {
                     return;
                 }
             }
 
-            localStorage.setItem('student_id', studentId);
+            localStorage.setItem('user_student_id', studentId);
             localStorage.setItem('user_uuid', studentId);
             userUUID = studentId;
             studentId = studentId;
@@ -1301,7 +1301,7 @@
             if (showActions) {
                 // 判断逻辑：自己发的 -> 编辑；别人发的且有联系方式 -> 联系
                 // 确保使用当前的 userUUID 或 studentId
-                const currentUserId = localStorage.getItem('student_id') || localStorage.getItem('user_uuid');
+                const currentUserId = localStorage.getItem('user_student_id') || localStorage.getItem('user_uuid');
                 const isMine = (book.owner_id === currentUserId) || (!book.owner_id && !book.id);
 
                 if (isMine) {
