@@ -63,7 +63,10 @@ class DatabaseService:
                 ("description", "TEXT"),
                 ("owner_id", "TEXT"),
                 ("contact", "TEXT"),
-                ("status", "INTEGER DEFAULT 0")
+                ("status", "INTEGER DEFAULT 0"),
+                ("delivery_method", "TEXT DEFAULT '自提'"),  # 交易方式：自提/可送/自提或可送
+                ("pickup_location", "TEXT"),  # 自提地点
+                ("delivery_fee", "TEXT")  # 配送费用（免费/具体金额）
             ]:
                 try:
                     cursor.execute(f"ALTER TABLE books ADD COLUMN {col[0]} {col[1]}")

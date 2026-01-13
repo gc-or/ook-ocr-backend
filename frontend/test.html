@@ -520,6 +520,8 @@
                 <div class="status" id="status"></div>
 
                 <button class="btn btn-primary" id="analyzeBtn" onclick="analyzeImage()" disabled>🔍 开始识别</button>
+                <button class="btn btn-secondary" onclick="openManualAddModal()" style="margin-top: 10px;">✏️
+                    手动添加书籍</button>
             </div>
 
             <div id="resultSection" style="display: none;">
@@ -677,6 +679,30 @@
             </div>
 
             <div class="form-group">
+                <label>📞 联系方式 (QQ)</label>
+                <input type="number" id="editContact" placeholder="请输入QQ号">
+            </div>
+
+            <div class="form-group">
+                <label>交易方式</label>
+                <select id="editDeliveryMethod" onchange="toggleDeliveryFields('edit')">
+                    <option value="自提">📍 仅自提</option>
+                    <option value="可送">🚚 仅可送</option>
+                    <option value="自提或可送">📍🚚 自提或可送</option>
+                </select>
+            </div>
+
+            <div class="form-group" id="editPickupGroup">
+                <label>自提地点</label>
+                <input type="text" id="editPickupLocation" placeholder="如：图书馆门口、宿舍楼下">
+            </div>
+
+            <div class="form-group" id="editDeliveryGroup" style="display: none;">
+                <label>配送费用</label>
+                <input type="text" id="editDeliveryFee" placeholder="如：免费、5元、面议">
+            </div>
+
+            <div class="form-group">
                 <label>备注描述</label>
                 <textarea id="editDescription" placeholder="添加备注信息..."></textarea>
             </div>
@@ -685,6 +711,99 @@
                 <button class="btn btn-secondary" onclick="closeEditModal()">取消</button>
                 <button class="btn btn-primary" onclick="saveBook()">💾 保存</button>
                 <button class="btn btn-secondary" style="color:#ff4d4f" onclick="deleteBook()">🗑️ 删除</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 手动添加书籍弹窗 -->
+    <div class="modal" id="manualAddModal">
+        <div class="modal-content">
+            <div class="modal-title">✏️ 手动添加书籍</div>
+
+            <div class="form-group">
+                <label>书名 *</label>
+                <input type="text" id="manualTitle" placeholder="请输入书名">
+            </div>
+
+            <div class="form-group">
+                <label>作者</label>
+                <input type="text" id="manualAuthor" placeholder="请输入作者">
+            </div>
+
+            <div class="form-group">
+                <label>出版社</label>
+                <input type="text" id="manualPublisher" placeholder="请输入出版社">
+            </div>
+
+            <div class="form-group">
+                <label>版次</label>
+                <input type="text" id="manualEdition" placeholder="如：第7版">
+            </div>
+
+            <div class="form-group">
+                <label>联系方式 (QQ)</label>
+                <input type="number" id="manualContact" placeholder="请输入QQ号">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>💰 价格（元）</label>
+                    <input type="number" id="manualPrice" placeholder="0.00" step="0.1" min="0">
+                </div>
+                <div class="form-group">
+                    <label>成色</label>
+                    <select id="manualCondition">
+                        <option value="全新">全新</option>
+                        <option value="九成新">九成新</option>
+                        <option value="良好" selected>良好</option>
+                        <option value="有笔记">有笔记</option>
+                        <option value="旧书">旧书</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>分类</label>
+                <select id="manualCategory">
+                    <option value="高等数学">高等数学</option>
+                    <option value="线性代数">线性代数</option>
+                    <option value="概率统计">概率统计</option>
+                    <option value="大学物理">大学物理</option>
+                    <option value="电子电路">电子电路</option>
+                    <option value="程序设计">程序设计</option>
+                    <option value="数据结构">数据结构</option>
+                    <option value="计算机网络">计算机网络</option>
+                    <option value="其他">其他</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>交易方式</label>
+                <select id="manualDeliveryMethod" onchange="toggleDeliveryFields('manual')">
+                    <option value="自提">📍 仅自提</option>
+                    <option value="可送">🚚 仅可送</option>
+                    <option value="自提或可送">📍🚚 自提或可送</option>
+                </select>
+            </div>
+
+            <div class="form-group" id="manualPickupGroup">
+                <label>自提地点</label>
+                <input type="text" id="manualPickupLocation" placeholder="如：图书馆门口、宿舍楼下">
+            </div>
+
+            <div class="form-group" id="manualDeliveryGroup" style="display: none;">
+                <label>配送费用</label>
+                <input type="text" id="manualDeliveryFee" placeholder="如：免费、5元、面议">
+            </div>
+
+            <div class="form-group">
+                <label>备注描述</label>
+                <textarea id="manualDescription" placeholder="添加备注信息..."></textarea>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeManualAddModal()">取消</button>
+                <button class="btn btn-primary" onclick="saveManualBook()">💾 保存</button>
             </div>
         </div>
     </div>
@@ -950,6 +1069,19 @@
             const conditionHtml = book.condition ? `<div class="meta-item">📦 ${book.condition}</div>` : '';
             const contactHtml = book.contact ? `<div class="meta-item" style="color:#667eea;font-weight:500">📞 QQ: ${book.contact}</div>` : '';
 
+            // 交易方式显示
+            let deliveryHtml = '';
+            if (book.delivery_method) {
+                let deliveryInfo = book.delivery_method;
+                if (book.delivery_method.includes('自提') && book.pickup_location) {
+                    deliveryInfo += ` (${book.pickup_location})`;
+                }
+                if (book.delivery_method.includes('可送') && book.delivery_fee) {
+                    deliveryInfo += ` (${book.delivery_fee})`;
+                }
+                deliveryHtml = `<div class="meta-item">🚚 ${deliveryInfo}</div>`;
+            }
+
             // 状态显示逻辑
             const isSold = book.status === 1;
             const statusHtml = isSold ?
@@ -1024,6 +1156,7 @@
                     ${conditionHtml}
                     ${statusHtml}
                     ${contactHtml}
+                    ${deliveryHtml}
                 </div>
                 ${priceHtml}
                 ${actionBtn ? `<div class="book-actions">${actionBtn}</div>` : ''}
@@ -1085,6 +1218,24 @@
         }
 
         // 编辑相关函数
+        function toggleDeliveryFields(prefix) {
+            const method = document.getElementById(`${prefix}DeliveryMethod`).value;
+            const pickupGroup = document.getElementById(`${prefix}PickupGroup`);
+            const deliveryGroup = document.getElementById(`${prefix}DeliveryGroup`);
+
+            // 根据选择显示/隐藏字段
+            if (method === '自提') {
+                pickupGroup.style.display = 'block';
+                deliveryGroup.style.display = 'none';
+            } else if (method === '可送') {
+                pickupGroup.style.display = 'none';
+                deliveryGroup.style.display = 'block';
+            } else { // 自提或可送
+                pickupGroup.style.display = 'block';
+                deliveryGroup.style.display = 'block';
+            }
+        }
+
         function openEditModal(bookId) {
             document.getElementById('editModal').classList.add('show');
             document.getElementById('editBookId').value = bookId;
@@ -1102,6 +1253,13 @@
                     document.getElementById('editCategory').value = book.category || '其他';
                     document.getElementById('editCondition').value = book.condition || '良好';
                     document.getElementById('editStatus').value = book.status ?? 0;
+                    document.getElementById('editContact').value = book.contact || '';
+                    document.getElementById('editDeliveryMethod').value = book.delivery_method || '自提';
+                    document.getElementById('editPickupLocation').value = book.pickup_location || '';
+                    document.getElementById('editDeliveryFee').value = book.delivery_fee || '';
+
+                    // 更新字段显示
+                    toggleDeliveryFields('edit');
                 });
         }
 
@@ -1121,6 +1279,10 @@
                 category: document.getElementById('editCategory').value,
                 condition: document.getElementById('editCondition').value,
                 status: parseInt(document.getElementById('editStatus').value),
+                contact: document.getElementById('editContact').value,
+                delivery_method: document.getElementById('editDeliveryMethod').value,
+                pickup_location: document.getElementById('editPickupLocation').value,
+                delivery_fee: document.getElementById('editDeliveryFee').value,
                 owner_id: userUUID
             };
 
@@ -1313,6 +1475,89 @@
                     alert('价格更新失败: ' + err.detail);
                     // 恢复原值
                     loadUserBooks(document.getElementById('tabSelling').classList.contains('active') ? 0 : 1);
+                }
+            } catch (e) {
+                console.error(e);
+                alert('网络错误');
+            }
+        }
+
+        // ========== 手动添加书籍功能 ==========
+        function openManualAddModal() {
+            document.getElementById('manualAddModal').style.display = 'flex';
+
+            // 预填充联系方式
+            const savedQQ = localStorage.getItem('user_qq');
+            if (savedQQ) {
+                document.getElementById('manualContact').value = savedQQ;
+            }
+
+            // 清空其他字段
+            document.getElementById('manualTitle').value = '';
+            document.getElementById('manualAuthor').value = '';
+            document.getElementById('manualPublisher').value = '';
+            document.getElementById('manualEdition').value = '';
+            document.getElementById('manualPrice').value = '';
+            document.getElementById('manualCondition').value = '良好';
+            document.getElementById('manualCategory').value = '其他';
+            document.getElementById('manualDescription').value = '';
+            document.getElementById('manualDeliveryMethod').value = '自提';
+            document.getElementById('manualPickupLocation').value = '';
+            document.getElementById('manualDeliveryFee').value = '';
+
+            // 更新字段显示
+            toggleDeliveryFields('manual');
+        }
+
+        function closeManualAddModal() {
+            document.getElementById('manualAddModal').style.display = 'none';
+        }
+
+        async function saveManualBook() {
+            const title = document.getElementById('manualTitle').value.trim();
+            if (!title) {
+                alert('请输入书名');
+                return;
+            }
+
+            const data = {
+                title: title,
+                author: document.getElementById('manualAuthor').value.trim() || null,
+                publisher: document.getElementById('manualPublisher').value.trim() || null,
+                edition: document.getElementById('manualEdition').value.trim() || null,
+                price: parseFloat(document.getElementById('manualPrice').value) || null,
+                condition: document.getElementById('manualCondition').value,
+                category: document.getElementById('manualCategory').value,
+                description: document.getElementById('manualDescription').value.trim() || null,
+                status: 0,  // 默认在售
+                owner_id: userUUID,
+                contact: document.getElementById('manualContact').value.trim() || null,
+                delivery_method: document.getElementById('manualDeliveryMethod').value,
+                pickup_location: document.getElementById('manualPickupLocation').value.trim() || null,
+                delivery_fee: document.getElementById('manualDeliveryFee').value.trim() || null
+            };
+
+            try {
+                const res = await fetch(`${API_BASE}/api/books`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-User-ID': userUUID
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (res.ok) {
+                    alert('添加成功');
+                    closeManualAddModal();
+
+                    // 如果在个人中心，刷新列表
+                    if (document.getElementById('userPage').classList.contains('active')) {
+                        loadUserBooks(0);
+                    }
+                } else {
+                    const err = await res.json();
+                    alert('添加失败: ' + err.detail);
                 }
             } catch (e) {
                 console.error(e);
