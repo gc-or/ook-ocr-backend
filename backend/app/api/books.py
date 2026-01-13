@@ -272,7 +272,10 @@ async def analyze_direct(
     file: UploadFile = File(...), 
     save: bool = True,
     x_user_id: Optional[str] = Header(None, alias="X-User-ID"),
-    x_contact: Optional[str] = Header(None, alias="X-Contact")
+    x_contact: Optional[str] = Header(None, alias="X-Contact"),
+    x_delivery_method: Optional[str] = Header(None, alias="X-Delivery-Method"),
+    x_pickup_location: Optional[str] = Header(None, alias="X-Pickup-Location"),
+    x_delivery_fee: Optional[str] = Header(None, alias="X-Delivery-Fee")
 ):
     """一键分析：上传图片并直接返回分析结果"""
     # 这里直接复用 analyze_image 的逻辑，但为了简单，先不支持 header 穿透到 upload，
@@ -282,12 +285,15 @@ async def analyze_direct(
     # 1. Upload
     upload_result = await upload_image(file)
     
-    # 2. Analyze (passing user info)
+    # 2. Analyze (passing user info and delivery info)
     return await analyze_image(
         upload_result.file_id, 
         save=save, 
         x_user_id=x_user_id, 
-        x_contact=x_contact
+        x_contact=x_contact,
+        x_delivery_method=x_delivery_method,
+        x_pickup_location=x_pickup_location,
+        x_delivery_fee=x_delivery_fee
     )
 
 
