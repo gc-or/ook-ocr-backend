@@ -97,10 +97,11 @@
 			
 			chooseImage() {
 				// 必须先填写学号才能选择图片
-				if (!this.studentId) {
+				if (!this.studentId || this.studentId.trim() === '') {
 					uni.showToast({
 						title: '请先填写学号',
-						icon: 'none'
+						icon: 'none',
+						duration: 2000
 					});
 					return;
 				}
@@ -184,9 +185,10 @@
 	.seller-info-section { background: #f5f5f5; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
 	.seller-info-box { margin-bottom: 12px; }
 	.seller-info-box:last-child { margin-bottom: 0; }
-	.seller-label { font-size: 13px; color: #999; display: block; margin-bottom: 6px; }
+	.seller-label { font-size: 13px; color: #999; display: block; margin-bottom: 6px; font-weight: 500; }
 	.required-star { color: #e74c3c; font-weight: bold; }
-	.seller-input { border: 1px solid #ddd; height: 36px; padding: 0 12px; border-radius: 6px; font-size: 14px; color: #666; background: #fff; }
+	.seller-input { border: 1px solid #ddd; height: 36px; padding: 0 12px; border-radius: 6px; font-size: 14px; color: #999; background: #fff; }
+	.seller-input::placeholder { color: #bbb; }
 	
 	.preview-area { background: #f5f5f5; border-radius: 12px; height: 250px; display: flex; align-items: center; justify-content: center; position: relative; margin-bottom: 15px; }
 	.preview-image { width: 100%; height: 100%; }
