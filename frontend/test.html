@@ -495,37 +495,8 @@
                 <div class="subtitle">拍照识别书脊，自动保存到书库</div>
             </div>
 
-            <div class="card">
-                <!-- 预览/上传区 -->
-                <div class="preview-area" id="previewArea" onclick="document.getElementById('fileInput').click()">
-                    <div class="placeholder" id="placeholder">
-                        <span class="icon">📷</span>
-                        <div>点击选择图片</div>
-                    </div>
-                    <img class="preview-image" id="previewImage" style="display: none;">
-                    <button class="clear-btn" id="clearBtn" onclick="event.stopPropagation(); clearImage()">✕</button>
-                </div>
-                <!-- 隐藏的 input -->
-                <input type="file" id="fileInput" accept="image/*" onchange="handleFileSelect(event)">
-
-                <!-- 拍摄提示 -->
-                <div
-                    style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 12px; margin: 15px 0; border-radius: 8px; font-size: 13px; color: #856404;">
-                    <strong>💡 拍摄建议：</strong><br>
-                    • 横向拍摄，让每本书占据一列<br>
-                    • 保持书脊清晰、光线充足<br>
-                    • 避免倾斜和阴影
-                </div>
-
-                <div class="status" id="status"></div>
-
-                <button class="btn btn-primary" id="analyzeBtn" onclick="analyzeImage()" disabled>🔍 开始识别</button>
-                <button class="btn btn-secondary" onclick="openManualAddModal()" style="margin-top: 10px;">✏️
-                    手动添加书籍</button>
-            </div>
-
-            <!-- 用户信息快速设置 -->
-            <div class="card" id="userInfoQuickSetup" style="margin-top: 20px; background: #f5f5f5;">
+            <!-- 用户信息快速设置 (卖家信息 - 灰色，必填) -->
+            <div class="card" id="userInfoQuickSetup" style="margin-top: 0; background: #f5f5f5;">
                 <div class="header">
                     <div class="title" style="font-size: 18px; color: #666;">👤 卖家信息</div>
                     <div class="subtitle" style="color: #999;">首次使用请先设置，方便买家联系您</div>
@@ -563,6 +534,35 @@
                     <label style="color: #999;">💰 配送费用</label>
                     <input type="text" id="quickDeliveryFee" placeholder="如：免费、5元、面议" style="color: #999;">
                 </div>
+            </div>
+
+            <div class="card">
+                <!-- 预览/上传区 -->
+                <div class="preview-area" id="previewArea" onclick="document.getElementById('fileInput').click()">
+                    <div class="placeholder" id="placeholder">
+                        <span class="icon">📷</span>
+                        <div>点击选择图片</div>
+                    </div>
+                    <img class="preview-image" id="previewImage" style="display: none;">
+                    <button class="clear-btn" id="clearBtn" onclick="event.stopPropagation(); clearImage()">✕</button>
+                </div>
+                <!-- 隐藏的 input -->
+                <input type="file" id="fileInput" accept="image/*" onchange="handleFileSelect(event)">
+
+                <!-- 拍摄提示 -->
+                <div
+                    style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 12px; margin: 15px 0; border-radius: 8px; font-size: 13px; color: #856404;">
+                    <strong>💡 拍摄建议：</strong><br>
+                    • 横向拍摄，让每本书占据一列<br>
+                    • 保持书脊清晰、光线充足<br>
+                    • 避免倾斜和阴影
+                </div>
+
+                <div class="status" id="status"></div>
+
+                <button class="btn btn-primary" id="analyzeBtn" onclick="analyzeImage()" disabled>🔍 开始识别</button>
+                <button class="btn btn-secondary" onclick="openManualAddModal()" style="margin-top: 10px;">✏️
+                    手动添加书籍</button>
             </div>
 
             <div id="resultSection" style="display: none;">
@@ -1178,6 +1178,15 @@
 
         async function analyzeImage() {
             if (!selectedFile) return;
+            
+            // 检查学号是否已填写
+            const studentId = localStorage.getItem('user_student_id');
+            if (!studentId || studentId.trim() === '') {
+                alert('⚠️ 请先填写学号！\n\n学号是您的唯一身份标识，用于管理您的书籍。');
+                document.getElementById('quickStudentId').focus();
+                return;
+            }
+            
             const btn = document.getElementById('analyzeBtn');
             const status = document.getElementById('status');
             btn.disabled = true;
@@ -1679,6 +1688,14 @@
 
         // ========== 手动添加书籍功能 ==========
         function openManualAddModal() {
+            // 检查学号是否已填写
+            const studentId = localStorage.getItem('user_student_id');
+            if (!studentId || studentId.trim() === '') {
+                alert('⚠️ 请先填写学号！\n\n学号是您的唯一身份标识，用于管理您的书籍。');
+                document.getElementById('quickStudentId').focus();
+                return;
+            }
+
             document.getElementById('manualAddModal').style.display = 'flex';
 
             // 预填充联系方式
