@@ -189,17 +189,18 @@ async def analyze_direct(
 
 # ============ 书籍管理 ============
 
-@router.get("/books", response_model=SearchResponse)
-async def search_books(
-    keyword: Optional[str] = Query(None, description="搜索关键词"),
-    category: Optional[str] = Query(None, description="分类筛选"),
-    limit: int = Query(50, ge=1, le=100),
-    offset: int = Query(0, ge=0)
+@router.get("/books", response_model=list[BookInfo])
+async def get_books(
+    keyword: str = None, 
+    category: str = None,
+    owner_id: str = None,
+    status: int = None,
+    limit: int = 50, 
+    offset: int = 0
 ):
-    """搜索书籍"""
+    """搜索书籍 (支持分页、筛选)"""
     db_service = get_db_service()
-    books = db_service.search_books(keyword, category, limit, offset)
-    return SearchResponse(success=True, total=len(books), books=[BookInfo(**b) for b in books])
+    return db_service.search_books(keyword, category, owner_id, status, limit, offset)
 
 
 @router.get("/books/{book_id}", response_model=BookInfo)

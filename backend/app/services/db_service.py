@@ -152,8 +152,9 @@ class DatabaseService:
             return cursor.rowcount > 0
     
     def search_books(self, keyword: str = None, category: str = None, 
+                     owner_id: str = None, status: int = None,
                      limit: int = 50, offset: int = 0) -> list[dict]:
-        """搜索书籍"""
+        """搜索书籍 (支持按用户和状态筛选)"""
         with self._get_connection() as conn:
             cursor = conn.cursor()
             
@@ -168,6 +169,14 @@ class DatabaseService:
             if category and category != "全部":
                 conditions.append("category = ?")
                 params.append(category)
+                
+            if owner_id:
+                conditions.append("owner_id = ?")
+                params.append(owner_id)
+                
+            if status is not None:
+                conditions.append("status = ?")
+                params.append(status)
             
             sql = "SELECT * FROM books"
             if conditions:
