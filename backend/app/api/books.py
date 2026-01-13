@@ -229,16 +229,22 @@ async def analyze_image(
         
         # 补充用户信息和交易方式
         if books_data and x_user_id:
+            # URL 解码交易方式信息（前端为了支持中文进行了编码）
+            from urllib.parse import unquote
+            delivery_method = unquote(x_delivery_method) if x_delivery_method else None
+            pickup_location = unquote(x_pickup_location) if x_pickup_location else None
+            delivery_fee = unquote(x_delivery_fee) if x_delivery_fee else None
+            
             for book in books_data:
                 book["owner_id"] = x_user_id
                 if x_contact:
                     book["contact"] = x_contact
-                if x_delivery_method:
-                    book["delivery_method"] = x_delivery_method
-                if x_pickup_location:
-                    book["pickup_location"] = x_pickup_location
-                if x_delivery_fee:
-                    book["delivery_fee"] = x_delivery_fee
+                if delivery_method:
+                    book["delivery_method"] = delivery_method
+                if pickup_location:
+                    book["pickup_location"] = pickup_location
+                if delivery_fee:
+                    book["delivery_fee"] = delivery_fee
         
         # 保存到数据库
         saved_ids = []

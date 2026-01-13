@@ -1199,13 +1199,13 @@
                 const qq = localStorage.getItem('user_qq');
                 if (qq) headers['X-Contact'] = qq;
 
-                // 添加交易方式信息
+                // 添加交易方式信息（URL编码中文，避免 ISO-8859-1 错误）
                 const deliveryMethod = localStorage.getItem('default_delivery_method');
                 const pickupLocation = localStorage.getItem('default_pickup_location');
                 const deliveryFee = localStorage.getItem('default_delivery_fee');
-                if (deliveryMethod) headers['X-Delivery-Method'] = deliveryMethod;
-                if (pickupLocation) headers['X-Pickup-Location'] = pickupLocation;
-                if (deliveryFee) headers['X-Delivery-Fee'] = deliveryFee;
+                if (deliveryMethod) headers['X-Delivery-Method'] = encodeURIComponent(deliveryMethod);
+                if (pickupLocation) headers['X-Pickup-Location'] = encodeURIComponent(pickupLocation);
+                if (deliveryFee) headers['X-Delivery-Fee'] = encodeURIComponent(deliveryFee);
 
                 const response = await fetch(`${API_BASE}/api/analyze-direct?save=true`, {
                     method: 'POST',
