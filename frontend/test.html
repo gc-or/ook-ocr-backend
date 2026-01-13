@@ -763,17 +763,60 @@
             document.getElementById('resultSection').style.display = 'none';
         }
 
+        async function compressImage(file, maxWidth = 1280, quality = 0.8) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = () => {
+                        let width = img.width;
+                        let height = img.height;
+
+                        // 调整尺寸
+                        if (width > maxWidth || height > maxWidth) {
+                            if (width > height) {
+                                height = Math.round(height * maxWidth / width);
+                                width = maxWidth;
+                            } else {
+                                width = Math.round(width * maxWidth / height);
+                                height = maxWidth;
+                            }
+                        }
+
+                        const canvas = document.createElement('canvas');
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        canvas.toBlob((blob) => {
+                            resolve(blob);
+                        }, 'image/jpeg', quality);
+                    };
+                };
+            });
+        }
+
         async function analyzeImage() {
             if (!selectedFile) return;
             const btn = document.getElementById('analyzeBtn');
             const status = document.getElementById('status');
             btn.disabled = true;
-            btn.innerHTML = '<span class="loading"></span>识别中...';
-            status.textContent = '正在上传并识别...';
+            btn.innerHTML = '<span class="loading"></span>处理中...';
+            status.textContent = '🖼️ 正在压缩图片...';
 
             try {
+                // 1. 压缩图片
+                const compressedBlob = await compressImage(selectedFile);
+                const compressedFile = new File([compressedBlob], selectedFile.name, { type: 'image/jpeg' });
+                console.log(`压缩前: ${(selectedFile.size / 1024).toFixed(0)}KB, 压缩后: ${(compressedFile.size / 1024).toFixed(0)}KB`);
+
+                status.textContent = '🚀 正在上传并识别...';
+
                 const formData = new FormData();
-                formData.append('file', selectedFile);
+                formData.append('file', compressedFile);
 
                 const headers = { 'X-User-ID': userUUID };
                 const qq = localStorage.getItem('user_qq');
