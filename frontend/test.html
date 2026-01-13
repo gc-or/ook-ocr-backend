@@ -886,19 +886,18 @@
 
         // 用户身份逻辑（使用学号）
         let userUUID = localStorage.getItem('user_uuid');
-        let studentId = localStorage.getItem('student_id');
+        let studentId = localStorage.getItem('user_student_id');  // 改为 user_student_id
 
-        // 如果没有学号，提示用户设置
+        // 如果没有学号，暂时使用临时ID
         if (!studentId) {
-            console.log('⚠️ 未设置学号，请在个人中心设置');
-            // 暂时使用临时ID，但会提示用户设置学号
+            console.log('⚠️ 未设置学号，请先填写学号');
             if (!userUUID) {
                 userUUID = 'temp_' + Date.now();
                 localStorage.setItem('user_uuid', userUUID);
             }
         } else {
             // 使用学号作为 user_uuid
-            userUUID = studentId;
+            userUUID = 'stu_' + studentId;
             localStorage.setItem('user_uuid', userUUID);
         }
 
@@ -917,7 +916,7 @@
 
         // 初始化快速设置
         function initQuickSetup() {
-            const studentId = localStorage.getItem('student_id');
+            const studentId = localStorage.getItem('user_student_id');  // 改为 user_student_id
             const qq = localStorage.getItem('user_qq');
             const deliveryMethod = localStorage.getItem('default_delivery_method') || '自提';
             const pickupLocation = localStorage.getItem('default_pickup_location') || '';
@@ -972,20 +971,17 @@
                 return;
             }
 
-            if (!qq) {
-                alert('请输入QQ号');
-                return;
+            // 保存所有信息 (使用统一的 key 名)
+            localStorage.setItem('user_student_id', studentId);  // 关键：用 user_student_id
+            localStorage.setItem('user_uuid', 'stu_' + studentId);
+            if (qq) {
+                localStorage.setItem('user_qq', qq);
             }
-
-            // 保存所有信息
-            localStorage.setItem('student_id', studentId);
-            localStorage.setItem('user_uuid', studentId);
-            localStorage.setItem('user_qq', qq);
             localStorage.setItem('default_delivery_method', document.getElementById('quickDeliveryMethod').value);
             localStorage.setItem('default_pickup_location', document.getElementById('quickPickupLocation').value.trim());
             localStorage.setItem('default_delivery_fee', document.getElementById('quickDeliveryFee').value.trim());
 
-            userUUID = studentId;
+            userUUID = 'stu_' + studentId;
             alert('信息保存成功！可随时修改交易方式信息。');
 
             // 不再隐藏卡片，允许用户随时修改
