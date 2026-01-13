@@ -525,29 +525,29 @@
             </div>
 
             <!-- 用户信息快速设置 -->
-            <div class="card" id="userInfoQuickSetup" style="margin-top: 20px;">
+            <div class="card" id="userInfoQuickSetup" style="margin-top: 20px; background: #f5f5f5;">
                 <div class="header">
-                    <div class="title" style="font-size: 18px;">👤 卖家信息</div>
-                    <div class="subtitle">首次使用请先设置，方便买家联系您</div>
+                    <div class="title" style="font-size: 18px; color: #666;">👤 卖家信息</div>
+                    <div class="subtitle" style="color: #999;">首次使用请先设置，方便买家联系您</div>
                 </div>
 
                 <div class="form-group">
-                    <label>🎓 学号（必填）</label>
+                    <label style="color: #999;">🎓 学号（必填）</label>
                     <div style="display: flex; gap: 10px;">
-                        <input type="text" id="quickStudentId" placeholder="输入学号作为身份标识">
+                        <input type="text" id="quickStudentId" placeholder="输入学号作为身份标识" style="color: #999;">
                         <button class="btn btn-primary" onclick="saveQuickInfo()"
                             style="width: auto; margin: 0;">保存</button>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label>📞 QQ号（必填）</label>
-                    <input type="number" id="quickQQ" placeholder="输入QQ号，方便买家联系">
+                    <label style="color: #999;">📞 QQ号（选填）</label>
+                    <input type="number" id="quickQQ" placeholder="输入QQ号，方便买家联系" style="color: #999;">
                 </div>
 
                 <div class="form-group">
-                    <label>🚚 默认交易方式</label>
-                    <select id="quickDeliveryMethod" onchange="toggleQuickDeliveryFields()">
+                    <label style="color: #999;">🚚 默认交易方式</label>
+                    <select id="quickDeliveryMethod" onchange="toggleQuickDeliveryFields()" style="color: #999;">
                         <option value="自提">📍 仅自提</option>
                         <option value="可送">🚚 仅可送</option>
                         <option value="自提或可送">📍🚚 自提或可送</option>
@@ -555,13 +555,13 @@
                 </div>
 
                 <div class="form-group" id="quickPickupGroup">
-                    <label>📍 自提地点</label>
-                    <input type="text" id="quickPickupLocation" placeholder="如：图书馆门口、宿舍楼下">
+                    <label style="color: #999;">📍 自提地点</label>
+                    <input type="text" id="quickPickupLocation" placeholder="如：图书馆门口、宿舍楼下" style="color: #999;">
                 </div>
 
                 <div class="form-group" id="quickDeliveryGroup" style="display: none;">
-                    <label>💰 配送费用</label>
-                    <input type="text" id="quickDeliveryFee" placeholder="如：免费、5元、面议">
+                    <label style="color: #999;">💰 配送费用</label>
+                    <input type="text" id="quickDeliveryFee" placeholder="如：免费、5元、面议" style="color: #999;">
                 </div>
             </div>
 
