@@ -444,13 +444,14 @@
 
 <body>
     <div class="container">
+        <!-- 标签导航 -->
         <div class="tabs">
-            <div class="tab active" onclick="switchTab('scan')">📷 扫描识别</div>
-            <div class="tab" onclick="switchTab('library')">📚 书库搜索</div>
-            <div class="tab" onclick="switchTab('user')">👤 个人中心</div>
+            <div class="tab active" onclick="switchTab('scan')" id="nav-scan">📷 扫描识别</div>
+            <div class="tab" onclick="switchTab('library')" id="nav-library">📚 书库搜索</div>
+            <div class="tab" onclick="switchTab('user')" id="nav-user">👤 个人中心</div>
         </div>
 
-        <!-- 扫描页 -->
+        <!-- 1. 扫描页 -->
         <div id="scanPage" class="page active">
             <div class="header">
                 <div class="title">📚 书籍识别</div>
@@ -458,6 +459,7 @@
             </div>
 
             <div class="card">
+                <!-- 预览/上传区 -->
                 <div class="preview-area" id="previewArea" onclick="document.getElementById('fileInput').click()">
                     <div class="placeholder" id="placeholder">
                         <span class="icon">📷</span>
@@ -466,6 +468,7 @@
                     <img class="preview-image" id="previewImage" style="display: none;">
                     <button class="clear-btn" id="clearBtn" onclick="event.stopPropagation(); clearImage()">✕</button>
                 </div>
+                <!-- 隐藏的 input -->
                 <input type="file" id="fileInput" accept="image/*" onchange="handleFileSelect(event)">
 
                 <div class="status" id="status"></div>
@@ -484,7 +487,7 @@
             </div>
         </div>
 
-        <!-- 书库页 -->
+        <!-- 2. 书库页 -->
         <div id="libraryPage" class="page">
             <div class="header">
                 <div class="title">📚 校园书库</div>
@@ -510,7 +513,7 @@
             <div id="searchResults"></div>
         </div>
 
-        <!-- 用户页 -->
+        <!-- 3. 用户页 -->
         <div id="userPage" class="page">
             <div class="header">
                 <div class="title">👤 个人中心</div>
@@ -530,6 +533,7 @@
             </div>
 
             <h3 style="color:white; margin: 20px 0 10px 10px;">我发布的书籍</h3>
+            <!-- 子标签栏 -->
             <div class="tabs" style="background: rgba(0,0,0,0.1);">
                 <div class="tab active" onclick="loadUserBooks(0)" id="tabSelling">🟢 在售中</div>
                 <div class="tab" onclick="loadUserBooks(1)" id="tabSold">🔴 已售出</div>
@@ -620,6 +624,7 @@
         </div>
     </div>
 
+    <!-- JavaScript 逻辑 -->
     <script>
         // API 配置
         function getApiBase() {
@@ -653,8 +658,12 @@
         window.onload = function () {
             const savedQQ = localStorage.getItem('user_qq');
             if (savedQQ) {
-                const input = document.getElementById('userQQ');
+                const input = document.getElementById('userQQInput');
                 if (input) input.value = savedQQ;
+            }
+            // 预加载书库统计
+            if (document.getElementById('libraryPage')) {
+                // Optional: Preload stats if wanted
             }
         }
 
@@ -664,31 +673,25 @@
             '数据结构': '#98D8C8', '计算机网络': '#F7DC6F', '其他': '#BDC3C7'
         };
 
+        // 切换标签页
         function switchTab(tab) {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            // 1. 隐藏所有页面
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-
-            // Update tabs buttons active state in the new layout
-            const tabs = document.querySelectorAll('.tabs button');
-            if (tabs.length > 0) {
-                tabs.forEach(t => t.classList.remove('active'));
-            }
+            // 2. 移除所有顶部导航激活状态 (注意不要移除子标签栏的active)
+            document.querySelectorAll('.container > .tabs > .tab').forEach(t => t.classList.remove('active'));
 
             if (tab === 'scan') {
-                // Update header tabs
-                if (document.querySelector('.tab:nth-child(1)')) document.querySelector('.tab:nth-child(1)').classList.add('active');
-                if (document.querySelector('.tabs button:nth-child(1)')) document.querySelector('.tabs button:nth-child(1)').classList.add('active');
+                document.getElementById('nav-scan').classList.add('active');
                 document.getElementById('scanPage').classList.add('active');
             } else if (tab === 'library') {
-                if (document.querySelector('.tab:nth-child(2)')) document.querySelector('.tab:nth-child(2)').classList.add('active');
-                if (document.querySelector('.tabs button:nth-child(2)')) document.querySelector('.tabs button:nth-child(2)').classList.add('active');
+                document.getElementById('nav-library').classList.add('active');
                 document.getElementById('libraryPage').classList.add('active');
                 loadLibrary();
             } else if (tab === 'user') {
-                if (document.querySelector('.tabs button:nth-child(3)')) document.querySelector('.tabs button:nth-child(3)').classList.add('active');
+                document.getElementById('nav-user').classList.add('active');
                 document.getElementById('userPage').classList.add('active');
 
-                // Init user page
+                // Init user page info
                 document.getElementById('userUuidDisplay').textContent = 'ID: ' + userUUID;
                 const savedQQ = localStorage.getItem('user_qq');
                 if (savedQQ) document.getElementById('userQQInput').value = savedQQ;
@@ -697,16 +700,20 @@
             }
         }
 
+        // 保存个人信息
         function saveUserInfo() {
             const qq = document.getElementById('userQQInput').value;
             if (qq) {
                 localStorage.setItem('user_qq', qq);
                 alert('个人信息已保存');
+            } else {
+                alert('请输入QQ号');
             }
         }
 
+        // 加载个人书籍
         async function loadUserBooks(status) {
-            // Toggle active tab buttons in user page
+            // 切换子标签状态
             document.getElementById('tabSelling').classList.toggle('active', status === 0);
             document.getElementById('tabSold').classList.toggle('active', status === 1);
 
@@ -756,13 +763,6 @@
             document.getElementById('resultSection').style.display = 'none';
         }
 
-        function saveUserQQ() {
-            const qq = document.getElementById('userQQ').value;
-            if (qq) {
-                localStorage.setItem('user_qq', qq);
-            }
-        }
-
         async function analyzeImage() {
             if (!selectedFile) return;
             const btn = document.getElementById('analyzeBtn');
@@ -770,8 +770,6 @@
             btn.disabled = true;
             btn.innerHTML = '<span class="loading"></span>识别中...';
             status.textContent = '正在上传并识别...';
-
-            saveUserQQ();
 
             try {
                 const formData = new FormData();
@@ -837,21 +835,21 @@
             }
 
             return `
-                <div class="book-card" style="${opacityStyle}">
-                    <div class="category-badge" style="background:${isSold ? '#999' : color}">${book.category || '其他'}</div>
-                    <div class="book-title">${book.title}</div>
-                    <div class="book-meta">
-                        ${book.author ? `<div class="meta-item">👤 ${book.author}</div>` : ''}
-                        ${book.publisher ? `<div class="meta-item">🏢 ${book.publisher}</div>` : ''}
-                        ${book.edition ? `<div class="meta-item">📖 ${book.edition}</div>` : ''}
-                        ${conditionHtml}
-                        ${statusHtml}
-                        ${contactHtml}
-                    </div>
-                    ${priceHtml}
-                    ${actionBtn ? `<div class="book-actions">${actionBtn}</div>` : ''}
+            <div class="book-card" style="${opacityStyle}">
+                <div class="category-badge" style="background:${isSold ? '#999' : color}">${book.category || '其他'}</div>
+                <div class="book-title">${book.title}</div>
+                <div class="book-meta">
+                    ${book.author ? `<div class="meta-item">👤 ${book.author}</div>` : ''}
+                    ${book.publisher ? `<div class="meta-item">🏢 ${book.publisher}</div>` : ''}
+                    ${book.edition ? `<div class="meta-item">📖 ${book.edition}</div>` : ''}
+                    ${conditionHtml}
+                    ${statusHtml}
+                    ${contactHtml}
                 </div>
-            `;
+                ${priceHtml}
+                ${actionBtn ? `<div class="book-actions">${actionBtn}</div>` : ''}
+            </div>
+        `;
         }
 
         function copyContact(qq) {
@@ -881,8 +879,8 @@
 
         function renderCategories(categories) {
             document.getElementById('categoryList').innerHTML = categories.map(cat => `
-                <div class="category-tag ${cat === currentCategory ? 'active' : ''}" onclick="filterCategory('${cat}')">${cat}</div>
-            `).join('');
+            <div class="category-tag ${cat === currentCategory ? 'active' : ''}" onclick="filterCategory('${cat}')">${cat}</div>
+        `).join('');
         }
 
         function filterCategory(category) {
@@ -895,42 +893,37 @@
             const keyword = document.getElementById('searchInput').value;
             const category = currentCategory === '全部' ? '' : currentCategory;
             try {
-                const params = new URLSearchParams();
-                if (keyword) params.append('keyword', keyword);
-                if (category) params.append('category', category);
-                const response = await fetch(`${API_BASE}/api/books?${params}`);
-                const data = await response.json();
-                if (data.books.length > 0) {
-                    document.getElementById('searchResults').innerHTML = data.books.map(book => renderBookCard(book, true)).join('');
-                } else {
-                    document.getElementById('searchResults').innerHTML = '<div class="empty"><span class="empty-icon">📭</span>暂无书籍</div>';
-                }
+                let url = `${API_BASE}/api/books?limit=50`;
+                if (keyword) url += `&keyword=${encodeURIComponent(keyword)}`;
+                if (category) url += `&category=${encodeURIComponent(category)}`;
+
+                const res = await fetch(url);
+                const books = await res.json();
+                document.getElementById('searchResults').innerHTML = books.map(book => renderBookCard(book)).join('');
             } catch (error) {
                 console.error('搜索失败:', error);
             }
         }
 
-        // 编辑弹窗
-        async function openEditModal(bookId) {
-            try {
-                const response = await fetch(`${API_BASE}/api/books/${bookId}`);
-                const book = await response.json();
+        // 编辑相关函数
+        function openEditModal(bookId) {
+            document.getElementById('editModal').classList.add('show');
+            document.getElementById('editBookId').value = bookId;
 
-                document.getElementById('editBookId').value = bookId;
-                document.getElementById('editTitle').value = book.title || '';
-                document.getElementById('editAuthor').value = book.author || '';
-                document.getElementById('editEdition').value = book.edition || '';
-                document.getElementById('editPublisher').value = book.publisher || '';
-                document.getElementById('editPrice').value = book.price || '';
-                document.getElementById('editCondition').value = book.condition || '良好';
-                document.getElementById('editCategory').value = book.category || '其他';
-                document.getElementById('editDescription').value = book.description || '';
-                document.getElementById('editStatus').value = book.status === 1 ? '1' : '0';
-
-                document.getElementById('editModal').classList.add('show');
-            } catch (error) {
-                alert('加载书籍信息失败');
-            }
+            // 加载书籍详情
+            fetch(`${API_BASE}/api/books/${bookId}`)
+                .then(res => res.json())
+                .then(book => {
+                    document.getElementById('editTitle').value = book.title;
+                    document.getElementById('editAuthor').value = book.author || '';
+                    document.getElementById('editPublisher').value = book.publisher || '';
+                    document.getElementById('editEdition').value = book.edition || '';
+                    document.getElementById('editPrice').value = book.price || '';
+                    document.getElementById('editDescription').value = book.description || '';
+                    document.getElementById('editCategory').value = book.category || '其他';
+                    document.getElementById('editCondition').value = book.condition || '良好';
+                    document.getElementById('editStatus').value = book.status ?? 0;
+                });
         }
 
         function closeEditModal() {
@@ -941,77 +934,64 @@
             const bookId = document.getElementById('editBookId').value;
             const data = {
                 title: document.getElementById('editTitle').value,
-                author: document.getElementById('editAuthor').value || null,
-                edition: document.getElementById('editEdition').value || null,
-                publisher: document.getElementById('editPublisher').value || null,
-                price: parseFloat(document.getElementById('editPrice').value) || null,
-                condition: document.getElementById('editCondition').value,
+                author: document.getElementById('editAuthor').value,
+                publisher: document.getElementById('editPublisher').value,
+                edition: document.getElementById('editEdition').value,
+                price: parseFloat(document.getElementById('editPrice').value) || 0,
+                description: document.getElementById('editDescription').value,
                 category: document.getElementById('editCategory').value,
-                description: document.getElementById('editDescription').value || null,
-                status: parseInt(document.getElementById('editStatus').value) || 0
-            };
-
-            const headers = {
-                'Content-Type': 'application/json',
-                'X-User-ID': localStorage.getItem('user_uuid') || ''
+                condition: document.getElementById('editCondition').value,
+                status: parseInt(document.getElementById('editStatus').value),
+                owner_id: userUUID
             };
 
             try {
-                const response = await fetch(`${API_BASE}/api/books/${bookId}`, {
+                const res = await fetch(`${API_BASE}/api/books/${bookId}`, {
                     method: 'PUT',
-                    headers: headers,
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
                 });
 
-                if (response.ok) {
+                if (res.ok) {
+                    alert('保存成功');
                     closeEditModal();
-                    searchBooks();
-                    if (document.getElementById('libraryPage').classList.contains('active')) {
-                        loadLibrary();
+                    // 刷新当前页面
+                    if (document.getElementById('userPage').classList.contains('active')) {
+                        loadUserBooks(data.status);
+                    } else if (document.getElementById('libraryPage').classList.contains('active')) {
+                        searchBooks();
+                    } else {
+                        // 如果是在扫描页的结果列表编辑，暂不自动刷新整个列表，或者可以清空结果
                     }
-                    alert('保存成功！');
                 } else {
-                    const err = await response.json();
-                    alert('保存失败: ' + (err.detail || '未知错误'));
+                    const err = await res.json();
+                    alert('保存失败: ' + err.detail);
                 }
-            } catch (error) {
-                alert('保存失败: ' + error.message);
+            } catch (e) {
+                alert('网络错误');
             }
         }
 
         async function deleteBook() {
             if (!confirm('确定要删除这本书吗？')) return;
-
             const bookId = document.getElementById('editBookId').value;
-            const headers = {
-                'X-User-ID': localStorage.getItem('user_uuid') || ''
-            };
 
             try {
-                const response = await fetch(`${API_BASE}/api/books/${bookId}`, {
-                    method: 'DELETE',
-                    headers: headers
+                const res = await fetch(`${API_BASE}/api/books/${bookId}?owner_id=${userUUID}`, {
+                    method: 'DELETE'
                 });
 
-                if (response.ok) {
+                if (res.ok) {
+                    alert('已删除');
                     closeEditModal();
-                    searchBooks();
-                    if (document.getElementById('libraryPage').classList.contains('active')) {
-                        loadLibrary();
-                    }
-                    alert('删除成功');
+                    loadUserBooks(0); // 假设主要是在管理页面删除
                 } else {
-                    const err = await response.json();
-                    alert('删除失败: ' + (err.detail || '未知错误'));
+                    alert('删除失败，可能无权限');
                 }
-            } catch (error) {
-                alert('删除失败: ' + error.message);
+            } catch (e) {
+                alert('网络错误');
             }
         }
-
-        document.getElementById('editModal').addEventListener('click', function (e) {
-            if (e.target === this) closeEditModal();
-        });
     </script>
 </body>
 
