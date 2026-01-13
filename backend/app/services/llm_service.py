@@ -33,8 +33,8 @@ class LLMService:
         # SiliconCloud API 端点 (兼容 OpenAI 格式)
         self.api_url = "https://api.siliconflow.cn/v1/chat/completions"
         
-        # 使用 DeepSeek V3 模型
-        self.model = "deepseek-ai/DeepSeek-V3"
+        # 使用 Qwen2.5-7B 模型 (速度更快，适合结构化提取)
+        self.model = "Qwen/Qwen2.5-7B-Instruct"
         
         # System Prompt
         self.system_prompt = """你是一个专业的书籍信息提取助手。
