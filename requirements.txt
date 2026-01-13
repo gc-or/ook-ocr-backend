@@ -23,3 +23,6 @@ numpy>=1.21.0,<2.0.0
 
 # 系统工具 (Paddle 依赖)
 setuptools
+
+# OpenCV 无头版 (解决 libGL 缺失问题)
+opencv-python-headless
