@@ -6,6 +6,12 @@
 				<text class="subtitle">拍摄书脊，自动识别信息</text>
 			</view>
 			
+			<!-- 学号输入框 (必填，放在最上方) -->
+			<view class="contact-box required-box">
+				<text class="contact-label">你的学号 <text class="required-star">*</text></text>
+				<input class="contact-input" type="text" v-model="studentId" placeholder="请先填写学号" @blur="saveStudentId" />
+			</view>
+			
 			<!-- QQ 输入框 -->
 			<view class="contact-box">
 				<text class="contact-label">你的 QQ 号 (选填):</text>
@@ -23,7 +29,7 @@
 			
 			<view class="status-text">{{ statusText }}</view>
 			
-			<button class="btn btn-primary" :disabled="!imagePath || loading" @click="analyzeImage">
+			<button class="btn btn-primary" :disabled="!imagePath || loading || !studentId" @click="analyzeImage">
 				{{ loading ? '识别中...' : '🔍 开始识别' }}
 			</button>
 		</view>
@@ -62,16 +68,25 @@
 				statusText: '',
 				result: null,
 				qq: '',
+				studentId: '',
 				categoryColors: {
 					'高等数学': '#FF6B6B', '线性代数': '#4ECDC4', '其他': '#BDC3C7'
 				}
 			}
 		},
 		onLoad() {
-			// 读取保存的 QQ
+			// 读取保存的学号和 QQ
+			this.studentId = uni.getStorageSync('user_student_id') || '';
 			this.qq = uni.getStorageSync('user_qq') || '';
 		},
 		methods: {
+			saveStudentId() {
+				// 保存学号到本地
+				if (this.studentId) {
+					uni.setStorageSync('user_student_id', this.studentId);
+				}
+			},
+			
 			saveQQ() {
 				// 保存 QQ 到本地，并在请求工具中自动带上
 				if (this.qq) {
@@ -80,6 +95,17 @@
 			},
 			
 			chooseImage() {
+				// 必须先填写学号才能选择图片
+				if (!this.studentId) {
+					uni.showToast({
+						title: '请先填写学号',
+						icon: 'none'
+					});
+					return;
+				}
+				// 保存学号
+				this.saveStudentId();
+				
 				uni.chooseImage({
 					count: 1,
 					sizeType: ['compressed'],
@@ -100,7 +126,17 @@
 			async analyzeImage() {
 				if (!this.imagePath) return;
 				
-				// 确保 QQ 已保存
+				// 确保学号已填写
+				if (!this.studentId) {
+					uni.showToast({
+						title: '请先填写学号',
+						icon: 'none'
+					});
+					return;
+				}
+				
+				// 保存学号和 QQ
+				this.saveStudentId();
 				this.saveQQ();
 				
 				this.loading = true;
@@ -144,7 +180,9 @@
 	.result-section .subtitle { color: rgba(255,255,255,0.8); }
 	
 	.contact-box { background: #f0f4ff; padding: 10px; border-radius: 8px; margin-bottom: 15px; display: flex; align-items: center; }
-	.contact-label { font-size: 14px; color: #666; margin-right: 10px; }
+	.contact-box.required-box { background: #fff0f0; border: 1px solid #ffcccc; }
+	.contact-label { font-size: 14px; color: #666; margin-right: 10px; white-space: nowrap; }
+	.required-star { color: #e74c3c; font-weight: bold; }
 	.contact-input { flex: 1; font-size: 14px; height: 30px; }
 	
 	.preview-area { background: #f5f5f5; border-radius: 12px; height: 250px; display: flex; align-items: center; justify-content: center; position: relative; }

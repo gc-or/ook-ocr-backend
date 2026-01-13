@@ -41,6 +41,23 @@
 			</view>
 			
 			<view class="form-item">
+				<text class="label">拿书方式</text>
+				<picker :range="deliveryMethods" @change="onDeliveryMethodChange" :value="deliveryMethodIndex">
+					<view class="picker-view">{{ form.delivery_method || '请选择' }}</view>
+				</picker>
+			</view>
+			
+			<view class="form-item">
+				<text class="label">📍 自提地点</text>
+				<input class="input" v-model="form.pickup_location" placeholder="如：宿舍区/图书馆" />
+			</view>
+			
+			<view class="form-item">
+				<text class="label">配送费用</text>
+				<input class="input" v-model="form.delivery_fee" placeholder="如：免费/5元" />
+			</view>
+			
+			<view class="form-item">
 				<text class="label">分类</text>
 				<picker :range="categories" @change="onCategoryChange" :value="categoryIndex">
 					<view class="picker-view">{{ form.category || '请选择' }}</view>
@@ -67,9 +84,11 @@
 				id: null,
 				form: {
 					title: '', author: '', edition: '', publisher: '',
-					price: '', condition: '良好', category: '其他', description: ''
+					price: '', condition: '良好', category: '其他', description: '',
+					contact: '', delivery_method: '自提', pickup_location: '', delivery_fee: ''
 				},
 				conditions: ['全新', '九成新', '良好', '有笔记', '旧书'],
+				deliveryMethods: ['自提', '可送', '自提或可送'],
 				categories: ['高等数学', '线性代数', '概率统计', '大学物理', '电子电路', '程序设计', '数据结构', '计算机网络', '其他'],
 				saving: false,
 				deleting: false
@@ -77,7 +96,8 @@
 		},
 		computed: {
 			conditionIndex() { return this.conditions.indexOf(this.form.condition) },
-			categoryIndex() { return this.categories.indexOf(this.form.category) }
+			categoryIndex() { return this.categories.indexOf(this.form.category) },
+			deliveryMethodIndex() { return this.deliveryMethods.indexOf(this.form.delivery_method) }
 		},
 		onLoad(options) {
 			if (options.id) {
@@ -97,6 +117,7 @@
 			
 			onConditionChange(e) { this.form.condition = this.conditions[e.detail.value]; },
 			onCategoryChange(e) { this.form.category = this.categories[e.detail.value]; },
+			onDeliveryMethodChange(e) { this.form.delivery_method = this.deliveryMethods[e.detail.value]; },
 			
 			async save() {
 				if (!this.form.title) return uni.showToast({ title: '请输入书名', icon: 'none' });

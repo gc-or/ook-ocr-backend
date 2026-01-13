@@ -57,15 +57,16 @@
 				
 				<view class="book-title">{{ book.title }}</view>
 				
-				<view class="book-meta">
-					<view v-if="book.author" class="meta-item">👤 {{ book.author }}</view>
-					<view v-if="book.publisher" class="meta-item">🏢 {{ book.publisher }}</view>
-					<view v-if="book.edition" class="meta-item">📖 {{ book.edition }}</view>
-					<view v-if="book.condition" class="meta-item">📦 {{ book.condition }}</view>
-					<view v-if="book.contact" class="meta-item contact-info">📞 QQ: {{ book.contact }}</view>
-				</view>
-				
-				<view v-if="book.price" class="book-price">¥{{ book.price }}</view>
+			<view class="book-meta">
+				<view v-if="book.author" class="meta-item">👤 {{ book.author }}</view>
+				<view v-if="book.publisher" class="meta-item">🏢 {{ book.publisher }}</view>
+				<view v-if="book.edition" class="meta-item">📖 {{ book.edition }}</view>
+				<view v-if="book.condition" class="meta-item">📦 {{ book.condition }}</view>
+				<view v-if="book.delivery_method" class="meta-item">📍 {{ book.delivery_method }}</view>
+				<view v-if="book.pickup_location" class="meta-item">📌 {{ book.pickup_location }}</view>
+				<view v-if="book.delivery_fee" class="meta-item">🚚 {{ book.delivery_fee }}</view>
+				<view v-if="book.contact" class="meta-item contact-info">📞 QQ: {{ book.contact }}</view>
+			</view>				<view v-if="book.price" class="book-price">¥{{ book.price }}</view>
 				
 				<!-- 操作栏 -->
 				<view class="book-actions">

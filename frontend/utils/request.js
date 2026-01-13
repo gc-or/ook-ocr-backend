@@ -1,13 +1,20 @@
 import { config } from './config.js';
 
-// 初始化用户 ID
+// 获取用户 ID (优先使用学号，没有则用旧的 UUID)
 const getUserId = () => {
+    // 优先使用学号作为用户标识
+    const studentId = uni.getStorageSync('user_student_id');
+    if (studentId) {
+        return 'stu_' + studentId;
+    }
+    
+    // 兼容旧用户：使用之前的 UUID
     let userId = uni.getStorageSync('user_uuid');
     if (!userId) {
         // 生成一个简单的 UUID (时间戳 + 随机数)
-        userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        userId = 'temp_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
         uni.setStorageSync('user_uuid', userId);
-        console.log('✨ 您的新身份 ID:', userId);
+        console.log('⚠️ 临时身份 ID (请填写学号):', userId);
     }
     return userId;
 };
