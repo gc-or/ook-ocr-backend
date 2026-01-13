@@ -1300,8 +1300,8 @@
             let actionBtn = '';
             if (showActions) {
                 // 判断逻辑：自己发的 -> 编辑；别人发的且有联系方式 -> 联系
-                // 确保使用当前的 userUUID 或 studentId
-                const currentUserId = localStorage.getItem('user_student_id') || localStorage.getItem('user_uuid');
+                // 使用 user_uuid 来比对（因为保存时用的是 user_uuid）
+                const currentUserId = localStorage.getItem('user_uuid');
                 const isMine = (book.owner_id === currentUserId) || (!book.owner_id && !book.id);
 
                 if (isMine) {
