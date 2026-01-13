@@ -439,6 +439,43 @@
                 transform: rotate(360deg);
             }
         }
+
+        /* 批量操作工具栏 */
+        .batch-toolbar {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin: 10px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* 书籍卡片复选框 */
+        .book-checkbox {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        /* 快速价格编辑 */
+        .quick-price-input {
+            width: 80px;
+            padding: 4px 8px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .quick-price-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
     </style>
 </head>
 
@@ -470,6 +507,15 @@
                 </div>
                 <!-- 隐藏的 input -->
                 <input type="file" id="fileInput" accept="image/*" onchange="handleFileSelect(event)">
+
+                <!-- 拍摄提示 -->
+                <div
+                    style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 12px; margin: 15px 0; border-radius: 8px; font-size: 13px; color: #856404;">
+                    <strong>💡 拍摄建议：</strong><br>
+                    • 横向拍摄，让每本书占据一列<br>
+                    • 保持书脊清晰、光线充足<br>
+                    • 避免倾斜和阴影
+                </div>
 
                 <div class="status" id="status"></div>
 
@@ -538,6 +584,25 @@
                 <div class="tab active" onclick="loadUserBooks(0)" id="tabSelling">🟢 在售中</div>
                 <div class="tab" onclick="loadUserBooks(1)" id="tabSold">🔴 已售出</div>
             </div>
+
+            <!-- 批量操作工具栏 -->
+            <div class="batch-toolbar" id="batchToolbar" style="display: none;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <label style="cursor: pointer; color: white; font-size: 14px;">
+                        <input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll()"
+                            style="margin-right: 5px;">
+                        全选
+                    </label>
+                    <span id="selectedCount" style="color: white; font-size: 14px;">已选: 0本</span>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn btn-small" onclick="batchUpdatePrice()" id="batchPriceBtn" disabled>💰
+                        改价格</button>
+                    <button class="btn btn-small" onclick="batchDelete()" id="batchDeleteBtn" disabled
+                        style="background: #ff4d4f;">🗑️ 批量删除</button>
+                </div>
+            </div>
+
             <div id="userBookList">
                 <div class="loading" style="display:none; text-align:center; color:white;">加载中...</div>
             </div>
@@ -717,6 +782,10 @@
             document.getElementById('tabSelling').classList.toggle('active', status === 0);
             document.getElementById('tabSold').classList.toggle('active', status === 1);
 
+            // 清空选中状态
+            selectedBooks.clear();
+            updateBatchToolbar();
+
             const container = document.getElementById('userBookList');
             container.innerHTML = '<div class="loading" style="display:block;text-align:center;margin:20px;"></div>';
 
@@ -725,13 +794,17 @@
                 const books = await res.json();
 
                 if (books.length === 0) {
+                    document.getElementById('batchToolbar').style.display = 'none';
                     container.innerHTML = `<div class="empty"><span class="empty-icon">📭</span>暂无${status === 0 ? '在售' : '已售'}书籍</div>`;
                     return;
                 }
 
-                container.innerHTML = books.map(book => renderBookCard(book, true)).join('');
+                // 显示批量操作工具栏
+                document.getElementById('batchToolbar').style.display = 'flex';
+                container.innerHTML = books.map(book => renderBookCard(book, true, true)).join('');
             } catch (e) {
                 console.error('加载个人书籍失败', e);
+                document.getElementById('batchToolbar').style.display = 'none';
                 container.innerHTML = '<div class="empty">加载失败，请检查网络</div>';
             }
         }
@@ -852,9 +925,28 @@
             document.getElementById('resultSection').scrollIntoView({ behavior: 'smooth' });
         }
 
-        function renderBookCard(book, showActions = true) {
+        function renderBookCard(book, showActions = true, inUserPage = false) {
             const color = categoryColors[book.category] || categoryColors['其他'];
-            const priceHtml = book.price ? `<div class="book-price">¥${book.price.toFixed(2)}</div>` : '';
+
+            // 价格显示逻辑：如果在个人中心则使用快速编辑输入框
+            let priceHtml = '';
+            if (inUserPage && book.price !== null && book.price !== undefined) {
+                priceHtml = `
+                    <div class="book-price" style="display: flex; align-items: center; gap: 6px;">
+                        💰 
+                        <input type="number" 
+                               class="quick-price-input" 
+                               value="${book.price.toFixed(2)}" 
+                               onblur="quickUpdatePrice(${book.id}, this.value)"
+                               onclick="event.stopPropagation()"
+                               min="0"
+                               step="0.01">
+                        元
+                    </div>`;
+            } else if (book.price) {
+                priceHtml = `<div class="book-price">¥${book.price.toFixed(2)}</div>`;
+            }
+
             const conditionHtml = book.condition ? `<div class="meta-item">📦 ${book.condition}</div>` : '';
             const contactHtml = book.contact ? `<div class="meta-item" style="color:#667eea;font-weight:500">📞 QQ: ${book.contact}</div>` : '';
 
@@ -864,6 +956,16 @@
                 `<div style="font-size:12px;background:#eee;color:#999;padding:2px 8px;border-radius:4px;display:inline-block;margin-top:4px;">🔴 已售出</div>` :
                 `<div style="font-size:12px;background:#e6fffa;color:#00b894;padding:2px 8px;border-radius:4px;display:inline-block;margin-top:4px;">🟢 在售</div>`;
             const opacityStyle = isSold ? 'opacity: 0.7;' : '';
+
+            // 复选框 (仅在个人中心显示)
+            const checkboxHtml = inUserPage ? `
+                <input type="checkbox" 
+                       class="book-checkbox" 
+                       id="checkbox-${book.id}" 
+                       data-book-id="${book.id}"
+                       onchange="toggleBookSelection(${book.id})"
+                       onclick="event.stopPropagation()">
+            ` : '';
 
             let actionBtn = '';
             if (showActions) {
@@ -878,7 +980,8 @@
             }
 
             return `
-            <div class="book-card" style="${opacityStyle}">
+            <div class="book-card" style="${opacityStyle}position: relative;">
+                ${checkboxHtml}
                 <div class="category-badge" style="background:${isSold ? '#999' : color}">${book.category || '其他'}</div>
                 <div class="book-title">${book.title}</div>
                 <div class="book-meta">
@@ -1036,6 +1139,147 @@
                 } else {
                     const err = await res.json();
                     alert('删除失败: ' + err.detail);
+                }
+            } catch (e) {
+                console.error(e);
+                alert('网络错误');
+            }
+        }
+
+        // ========== 批量操作功能 ==========
+        let selectedBooks = new Set();
+
+        function toggleBookSelection(bookId) {
+            const checkbox = document.getElementById(`checkbox-${bookId}`);
+            if (checkbox.checked) {
+                selectedBooks.add(bookId);
+            } else {
+                selectedBooks.delete(bookId);
+            }
+            updateBatchToolbar();
+        }
+
+        function toggleSelectAll() {
+            const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+            const allCheckboxes = document.querySelectorAll('#userBookList .book-checkbox');
+
+            allCheckboxes.forEach(cb => {
+                cb.checked = selectAllCheckbox.checked;
+                const bookId = parseInt(cb.getAttribute('data-book-id'));
+                if (selectAllCheckbox.checked) {
+                    selectedBooks.add(bookId);
+                } else {
+                    selectedBooks.delete(bookId);
+                }
+            });
+            updateBatchToolbar();
+        }
+
+        function updateBatchToolbar() {
+            const count = selectedBooks.size;
+            document.getElementById('selectedCount').textContent = `已选: ${count}本`;
+            document.getElementById('selectAllCheckbox').checked = count > 0 &&
+                count === document.querySelectorAll('#userBookList .book-checkbox').length;
+
+            // 启用/禁用批量操作按钮
+            const hasSelection = count > 0;
+            document.getElementById('batchPriceBtn').disabled = !hasSelection;
+            document.getElementById('batchDeleteBtn').disabled = !hasSelection;
+        }
+
+        async function batchDelete() {
+            if (selectedBooks.size === 0) return;
+            if (!confirm(`确定要删除选中的 ${selectedBooks.size} 本书吗？`)) return;
+
+            try {
+                const res = await fetch(`${API_BASE}/api/books/batch/delete`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-User-ID': userUUID
+                    },
+                    body: JSON.stringify(Array.from(selectedBooks))
+                });
+
+                if (res.ok) {
+                    const result = await res.json();
+                    alert(result.message);
+                    selectedBooks.clear();
+                    loadUserBooks(document.getElementById('tabSelling').classList.contains('active') ? 0 : 1);
+                } else {
+                    const err = await res.json();
+                    alert('删除失败: ' + err.detail);
+                }
+            } catch (e) {
+                console.error(e);
+                alert('网络错误');
+            }
+        }
+
+        async function batchUpdatePrice() {
+            if (selectedBooks.size === 0) return;
+            const newPrice = prompt(`请输入统一价格（针对选中的 ${selectedBooks.size} 本书）：`);
+            if (newPrice === null) return;
+
+            const price = parseFloat(newPrice);
+            if (isNaN(price) || price < 0) {
+                alert('请输入有效的价格');
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_BASE}/api/books/batch/price`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-User-ID': userUUID
+                    },
+                    body: JSON.stringify({
+                        book_ids: Array.from(selectedBooks),
+                        price: price
+                    })
+                });
+
+                if (res.ok) {
+                    const result = await res.json();
+                    alert(result.message);
+                    selectedBooks.clear();
+                    loadUserBooks(document.getElementById('tabSelling').classList.contains('active') ? 0 : 1);
+                } else {
+                    const err = await res.json();
+                    alert('修改失败: ' + err.detail);
+                }
+            } catch (e) {
+                console.error(e);
+                alert('网络错误');
+            }
+        }
+
+        async function quickUpdatePrice(bookId, newPrice) {
+            const price = parseFloat(newPrice);
+            if (isNaN(price) || price < 0) {
+                alert('请输入有效的价格');
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_BASE}/api/books/${bookId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-User-ID': userUUID
+                    },
+                    body: JSON.stringify({ price: price })
+                });
+
+                if (res.ok) {
+                    // 更新成功，不弹窗，保持用户体验流畅
+                    console.log(`书籍 ${bookId} 价格已更新为 ${price}`);
+                } else {
+                    const err = await res.json();
+                    alert('价格更新失败: ' + err.detail);
+                    // 恢复原值
+                    loadUserBooks(document.getElementById('tabSelling').classList.contains('active') ? 0 : 1);
                 }
             } catch (e) {
                 console.error(e);

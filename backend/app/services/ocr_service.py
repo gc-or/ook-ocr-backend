@@ -39,13 +39,13 @@ class OCRService:
 
     def extract_text(self, image_path: str) -> str:
         """
-        从图片中提取文字
+        从图片中提取文字，并按列分组（适合书脊识别）
         
         Args:
             image_path: 图片文件路径
             
         Returns:
-            str: 识别出的所有文字，用换行符分隔
+            str: 按列分组的文字，用分隔符标记不同列/书籍
         """
         # 检查文件是否存在
         if not Path(image_path).exists():
@@ -55,18 +55,78 @@ class OCRService:
         # result 格式: [[[坐标], (文字, 置信度)], ...]
         result = self._ocr.ocr(image_path, cls=True)
 
-        # 提取所有识别出的文字
-        texts = []
-        if result and result[0]:  # 确保有识别结果
-            for line in result[0]:
-                text = line[1][0]      # 提取文字
-                confidence = line[1][1]  # 提取置信度
-                # 只保留置信度大于 0.6 的结果
-                if confidence > 0.6:
-                    texts.append(text)
+        if not result or not result[0]:
+            return ""
 
-        # 用换行符拼接所有文字
-        return "\n".join(texts)
+        # 提取文字和坐标信息
+        text_blocks = []
+        for line in result[0]:
+            coords = line[0]  # [[x1,y1], [x2,y2], [x3,y3], [x4,y4]]
+            text = line[1][0]
+            confidence = line[1][1]
+            
+            # 只保留置信度大于 0.6 的结果
+            if confidence > 0.6:
+                # 计算中心点的 X 坐标（用于列分组）
+                center_x = sum([p[0] for p in coords]) / 4
+                center_y = sum([p[1] for p in coords]) / 4
+                text_blocks.append({
+                    'text': text,
+                    'x': center_x,
+                    'y': center_y,
+                    'confidence': confidence
+                })
+
+        if not text_blocks:
+            return ""
+
+        # 按列分组：根据 X 坐标聚类
+        columns = self._group_into_columns(text_blocks)
+        
+        # 每列内部按 Y 坐标从上到下排序
+        grouped_text = []
+        for col_idx, column in enumerate(columns):
+            column_sorted = sorted(column, key=lambda b: b['y'])
+            column_text = '\n'.join([b['text'] for b in column_sorted])
+            grouped_text.append(column_text)
+        
+        # 用特殊分隔符区分不同列（不同书籍）
+        return '\n---BOOK_SEPARATOR---\n'.join(grouped_text)
+
+    def _group_into_columns(self, text_blocks, threshold=50):
+        """
+        根据 X 坐标将文字块分组成列
+        
+        Args:
+            text_blocks: 文字块列表
+            threshold: X 坐标差距阈值（像素），小于此值视为同一列
+            
+        Returns:
+            list: 列的列表，每列包含多个文字块
+        """
+        if not text_blocks:
+            return []
+        
+        # 按 X 坐标排序
+        sorted_blocks = sorted(text_blocks, key=lambda b: b['x'])
+        
+        columns = []
+        current_column = [sorted_blocks[0]]
+        
+        for block in sorted_blocks[1:]:
+            # 如果与当前列的最后一个块 X 坐标接近，归入同一列
+            if abs(block['x'] - current_column[-1]['x']) < threshold:
+                current_column.append(block)
+            else:
+                # 否则开始新的一列
+                columns.append(current_column)
+                current_column = [block]
+        
+        # 添加最后一列
+        if current_column:
+            columns.append(current_column)
+        
+        return columns
 
 
 # 创建全局 OCR 服务实例（懒加载，首次调用时才初始化）

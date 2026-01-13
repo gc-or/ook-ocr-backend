@@ -227,6 +227,39 @@ class DatabaseService:
             cursor.execute("DELETE FROM books WHERE id = ?", (book_id,))
             conn.commit()
             return cursor.rowcount > 0
+    
+    def batch_delete_books(self, book_ids: list[int], owner_id: str) -> int:
+        """批量删除书籍（仅限本人）"""
+        if not book_ids:
+            return 0
+            
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            # 使用 IN 子句批量删除，同时验证 owner_id
+            placeholders = ','.join('?' * len(book_ids))
+            sql = f"DELETE FROM books WHERE id IN ({placeholders}) AND owner_id = ?"
+            cursor.execute(sql, book_ids + [owner_id])
+            conn.commit()
+            deleted_count = cursor.rowcount
+            print(f"🗑️ 批量删除了 {deleted_count} 本书")
+            return deleted_count
+    
+    def batch_update_price(self, book_ids: list[int], price: float, owner_id: str) -> int:
+        """批量修改价格（仅限本人）"""
+        if not book_ids:
+            return 0
+            
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            # 使用 IN 子句批量更新，同时验证 owner_id
+            placeholders = ','.join('?' * len(book_ids))
+            sql = f"UPDATE books SET price = ?, updated_at = CURRENT_TIMESTAMP WHERE id IN ({placeholders}) AND owner_id = ?"
+            cursor.execute(sql, [price] + book_ids + [owner_id])
+            conn.commit()
+            updated_count = cursor.rowcount
+            print(f"💰 批量修改了 {updated_count} 本书的价格为 {price} 元")
+            return updated_count
+
 
 
 # 全局实例

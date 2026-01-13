@@ -290,6 +290,55 @@ async def delete_book(
     return {"success": True, "message": "删除成功"}
 
 
+@router.post("/books/batch/delete")
+async def batch_delete_books(
+    book_ids: list[int] = Body(...),
+    x_user_id: Optional[str] = Header(None, alias="X-User-ID")
+):
+    """批量删除书籍（需要权限验证）"""
+    if not x_user_id:
+        raise HTTPException(status_code=401, detail="未提供用户ID")
+    
+    if not book_ids:
+        raise HTTPException(status_code=400, detail="未提供书籍ID列表")
+    
+    db_service = get_db_service()
+    deleted_count = db_service.batch_delete_books(book_ids, x_user_id)
+    
+    return {
+        "success": True, 
+        "message": f"成功删除 {deleted_count} 本书籍",
+        "deleted_count": deleted_count
+    }
+
+
+@router.post("/books/batch/price")
+async def batch_update_price(
+    book_ids: list[int] = Body(...),
+    price: float = Body(...),
+    x_user_id: Optional[str] = Header(None, alias="X-User-ID")
+):
+    """批量修改价格（需要权限验证）"""
+    if not x_user_id:
+        raise HTTPException(status_code=401, detail="未提供用户ID")
+    
+    if not book_ids:
+        raise HTTPException(status_code=400, detail="未提供书籍ID列表")
+    
+    if price < 0:
+        raise HTTPException(status_code=400, detail="价格不能为负数")
+    
+    db_service = get_db_service()
+    updated_count = db_service.batch_update_price(book_ids, price, x_user_id)
+    
+    return {
+        "success": True,
+        "message": f"成功修改 {updated_count} 本书籍的价格",
+        "updated_count": updated_count
+    }
+
+
+
 @router.get("/categories")
 async def get_categories():
     """获取所有分类列表"""
