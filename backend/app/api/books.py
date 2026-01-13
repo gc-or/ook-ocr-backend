@@ -101,6 +101,11 @@ async def upload_image(file: UploadFile = File(...)):
     return UploadResponse(success=True, message="图片上传成功", file_id=file_id, filename=filename)
 
 
+import asyncio
+
+# 并发控制：限制只有 1 个 OCR 任务同时进行，防止内存溢出
+ocr_semaphore = asyncio.Semaphore(1)
+
 @router.post("/analyze/{file_id}", response_model=AnalyzeResponse)
 async def analyze_image(
     file_id: str, 
@@ -124,10 +129,15 @@ async def analyze_image(
     file_path = matching_files[0]
     
     try:
-        # OCR
+        # OCR (CPU 密集型任务，放入线程池并加锁)
         t0 = time.time()
         ocr_service = get_ocr_service()
-        ocr_text = ocr_service.extract_text(str(file_path))
+        
+        # 1. 抢锁 (如果有人在用，这里会排队等待，但不会阻塞主线程)
+        async with ocr_semaphore:
+            # 2. 扔到后台线程跑 (释放主线程去处理别人的 HTTP 请求)
+            ocr_text = await asyncio.to_thread(ocr_service.extract_text, str(file_path))
+            
         t1 = time.time()
         print(f"⏱️ [Perf] OCR Engine took: {t1 - t0:.2f}s")
         
