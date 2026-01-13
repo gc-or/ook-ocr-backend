@@ -9,7 +9,7 @@ nixPkgs = ["python311", "libGL", "libglvnd", "glib", "xorg.libXext", "xorg.libSM
 # 2. 强制卸载可能被自动安装的有头版 opencv-python
 # 3. 确保安装无头版 opencv-python-headless (不依赖 libGL)
 cmds = [
-    "python -m venv /opt/venv && . /opt/venv/bin/activate && pip install -r requirements.txt && pip uninstall -y opencv-python && pip install opencv-python-headless"
+    "python -m venv /opt/venv && . /opt/venv/bin/activate && pip install -r requirements.txt && pip uninstall -y opencv-python opencv-python-headless && pip install opencv-python-headless==4.8.0.74"
 ]
 
 [start]
