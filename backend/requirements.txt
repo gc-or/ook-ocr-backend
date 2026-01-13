@@ -1,0 +1,22 @@
+# FastAPI 核心框架
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+
+# 文件上传支持
+python-multipart==0.0.6
+
+# 环境变量管理
+python-dotenv==1.0.0
+
+# PaddleOCR 相关 (Phase 2 会用到)
+paddlepaddle==2.6.2
+paddleocr==2.7.3
+
+# LLM API 调用
+httpx==0.26.0
+
+# 图片处理
+Pillow==10.2.0
+
+# NumPy 版本兼容性 (PaddlePaddle 需要 NumPy 1.x)
+numpy>=1.21.0,<2.0.0

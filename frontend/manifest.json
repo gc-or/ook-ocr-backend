@@ -1,0 +1,30 @@
+{
+    "name": "校园二手书AI识别",
+    "appid": "",
+    "description": "基于AI的二手书信息识别小程序",
+    "versionName": "1.0.0",
+    "versionCode": "100",
+    "transformPx": false,
+    "app-plus": {
+        "usingComponents": true,
+        "splashscreen": {
+            "alwaysShowBeforeRender": true,
+            "waiting": true,
+            "autoclose": true,
+            "delay": 0
+        }
+    },
+    "mp-weixin": {
+        "appid": "",
+        "setting": {
+            "urlCheck": false
+        },
+        "usingComponents": true
+    },
+    "h5": {
+        "title": "校园二手书AI识别",
+        "router": {
+            "mode": "hash"
+        }
+    }
+}

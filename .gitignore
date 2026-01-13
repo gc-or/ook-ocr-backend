@@ -1,0 +1,39 @@
+# 忽略不需要上传的文件
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+ENV/
+.venv/
+
+# 上传的图片（太大）
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# 数据库文件
+*.db
+*.sqlite3
+
+# 环境变量
+.env
+.env.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# 前端 node_modules（如果有）
+node_modules/

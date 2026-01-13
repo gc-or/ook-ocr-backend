@@ -1,0 +1,48 @@
+{
+    "pages": [
+        {
+            "path": "pages/index/index",
+            "style": {
+                "navigationBarTitleText": "📷 拍照识别"
+            }
+        },
+        {
+            "path": "pages/library/library",
+            "style": {
+                "navigationBarTitleText": "📚 书库搜索",
+                "enablePullDownRefresh": true
+            }
+        },
+        {
+            "path": "pages/edit/edit",
+            "style": {
+                "navigationBarTitleText": "📝 编辑书籍"
+            }
+        }
+    ],
+    "globalStyle": {
+        "navigationBarTextStyle": "white",
+        "navigationBarTitleText": "校园二手书 AI",
+        "navigationBarBackgroundColor": "#667eea",
+        "backgroundColor": "#F8F8F8"
+    },
+    "tabBar": {
+        "color": "#999999",
+        "selectedColor": "#667eea",
+        "backgroundColor": "#ffffff",
+        "list": [
+            {
+                "pagePath": "pages/index/index",
+                "text": "识别",
+                "iconPath": "static/tab-scan.png",
+                "selectedIconPath": "static/tab-scan-active.png"
+            },
+            {
+                "pagePath": "pages/library/library",
+                "text": "书库",
+                "iconPath": "static/tab-library.png",
+                "selectedIconPath": "static/tab-library-active.png"
+            }
+        ]
+    }
+}
